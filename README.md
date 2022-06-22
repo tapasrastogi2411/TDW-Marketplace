@@ -6,7 +6,7 @@
 | ----------------- | ---------------------------------- | -------- | ---------- | 
 | Divyam Patel      |                                    |          |            |       
 | Tapas Rastogi     | tapas.rastogi@mail.utoronto.ca     | rastog32 | 1005734608 |
-| Winson Yuan       |                                    |          |            |
+| Winson Yuan       | winson.yuan@mail.utoronto.ca       | yuanwins | 1006414051 |
 
 
 ## Project Description
