@@ -12,8 +12,7 @@
 ## Project Description
 This is a marketplace app which allows: 
 - Users to login through various other providers 
-- Users to list items for sale (with multiple videos/image uploads), specify more details about the item
-- Users to search for items listed for sale and inquire the seller for more information
+- Users to list items for sale (with multiple image uploads), specify more details about the item
 - Sellers to create live bidding sessions in a video call
 
 ## Concepts to be for the Challenge Factor
@@ -39,6 +38,7 @@ This is a marketplace app which allows:
 - React and Material UI/Tailwind CSS - frontend 
 - NodeJS
 - API powered by GraphQL
+- Images uploaded by users to be stored in S3
 
 ## Method of Deployment
 - Dockerize and push to GitHub container registry for both frontend and backend application
