@@ -15,17 +15,17 @@ This is a marketplace app which allows:
 - Users to list items for sale (with multiple image uploads), specify more details about the item
 - Sellers to create live bidding sessions in a video call
 
-## Concepts to be for the Challenge Factor
+## Concepts to be used for Challenge Factor
 - `OAuth 2.0` - Users are able to sign in to our application using other oauth providers such as Google, Facebook and more that request authorization for multiple scopes such as contact information 
 - `Real-time interaction` - Sellers would be able to host live bidding sessions with a video chat where they would have the option to also change their background
-- `Workers` - Utilize workers in backend to send emails after a few minutes after registration, and before live bidding sessions start
+- `Workers` - Utilize workers in backend to send emails a few minutes after registration, and before live bidding sessions start
 
-## Key features to be by the beta version
+## Key features to be completed by the beta version
 - Plan on getting `OAuth 2.0` to authenticate users to login to our application 
-- Users can add new items to sell and view others items put for sale
 - Live video bidding sessions
+- Deploy web application in a docker container
 - Functional and working UI
-- If time permits, deploy web application in a docker container
+- Users can add new items to sell and view others items put for sale
 
 ## Additional features to be by final version
 - Enhance the UI with library components such as Material UI/Tailwind CSS
@@ -38,9 +38,9 @@ This is a marketplace app which allows:
 - React and Material UI/Tailwind CSS - frontend 
 - NodeJS
 - API powered by GraphQL
-- Images uploaded by users to be stored in S3
+- Images uploaded by users to be stored in Amazon S3
 
 ## Method of Deployment
-- Dockerize and push to GitHub container registry for both frontend and backend application
-- Deploy with Google Kubernetes Engine cluster
+- Dockerize and push to GitHub Container Registry for both frontend and backend application
+- Deploy with Google Kubernetes Engine Cluster
 
