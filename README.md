@@ -19,16 +19,16 @@ This is a marketplace app which allows:
 - `OAuth 2.0` - Users are able to sign in to our application using other oauth providers such as Google, Facebook and more that request authorization for multiple scopes such as contact information 
 - `Real-time interaction` - Sellers would be able to host live bidding sessions with a video chat where they would have the option to also change their background
 - `Workers` - Utilize workers in backend to send emails a few minutes after registration, and before live bidding sessions start
-- `Scalability` = Using the Google Kubernetes Engine Cluster for deployment will explicitly take into account scalability in our web application's design
+- `Scalability` - Using the Google Kubernetes Engine(GKE) Cluster for deployment will explicitly take into account scalability in our web application's design
 
 ## Key features to be completed by the beta version
 - Plan on getting `OAuth 2.0` to authenticate users to login to our application 
 - Live video bidding sessions
-- Deploy web application in a docker container
+- Deploy web application in a docker container and a GKE Cluster
 - Functional and working UI
 - Users can add new items to sell and view others items put for sale
 
-## Additional features to be by final version
+## Additional features to be completed by final version
 - Enhance the UI with library components such as Material UI/Tailwind CSS
 - Workers implemented to send emails after user registers and inquires about an item, and before live bidding sessions start
 - Live video session now have the ability to change their backgrounds
