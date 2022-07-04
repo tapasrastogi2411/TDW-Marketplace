@@ -1,7 +1,8 @@
-import {getAuth, signInWithPopup} from "firebase/auth"; 
+import {getAuth, signInWithPopup, signOut} from "firebase/auth"; 
 import app from '../config/firebase-config'; 
 
-const socialMediaAuth = (provider) => { 
+//signin
+export const signInToApp = (provider) => { 
   const auth = getAuth(app); 
   return signInWithPopup(auth, provider).then((res) => { 
     return res.user; 
@@ -10,4 +11,13 @@ const socialMediaAuth = (provider) => {
   }); 
 }; 
 
-export default socialMediaAuth; 
+export const signOutOfApp = () => { 
+  const auth = getAuth(app); 
+  signOut(auth).then(() => {
+    // Sign-out successful.
+    console.log("signed out");
+  }).catch((err) => {
+    // An error happened.
+    return err; 
+  });
+} 

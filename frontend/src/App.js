@@ -1,18 +1,23 @@
 import logo from './logo.svg';
 import './App.css';
-import socialMediaAuth from './service/auth';
+import {signInToApp, signOutOfApp} from './service/auth';
 import {googleProvider} from './config/authMethods'; 
 
 function App() {
-  const handleOnClick = async (provider) => { 
-    const res = await socialMediaAuth(provider); 
+  const handleSignIn = async (provider) => { 
+    const res = await signInToApp(provider); 
     console.log(res); 
   }; 
+
+  const handleSignOut = async () => { 
+    const res = await signOutOfApp(); 
+  };
 
   return (
     <div className="App">
       <header className="App-header">
-        <button onClick={() => handleOnClick(googleProvider)}>Google</button> 
+        <button onClick={() => handleSignIn(googleProvider)}>Google</button> 
+        <button onClick={() => handleSignOut()}>Sign Out</button> 
         <img src={logo} className="App-logo" alt="logo" />
         <p>
           Edit <code>src/App.js</code> and save to reload.
