@@ -1,16 +1,21 @@
 import logo from './logo.svg';
 import './App.css';
-import {signInToApp, signOutOfApp} from './service/auth';
+import {signInToApp, signOutOfApp, getCurrentUser} from './service/auth';
 import {googleProvider} from './config/authMethods'; 
 
 function App() {
   const handleSignIn = async (provider) => { 
-    const res = await signInToApp(provider); 
-    console.log(res); 
+    await signInToApp(provider); 
+    const user = getCurrentUser(); 
+    console.log(user); 
   }; 
 
   const handleSignOut = async () => { 
-    const res = await signOutOfApp(); 
+    await signOutOfApp(); 
+    const user = getCurrentUser(); 
+    if (user === null){ 
+      console.log("User Signed Out."); 
+    }
   };
 
   return (
