@@ -1,7 +1,7 @@
 import logo from './logo.svg';
 import './App.css';
 import {signInToApp, signOutOfApp, getCurrentUser} from './service/auth';
-import {googleProvider} from './config/authMethods'; 
+import {googleProvider, facebookProvider, githubProvider} from './config/authMethods'; 
 
 function App() {
   const handleSignIn = async (provider) => { 
@@ -22,6 +22,8 @@ function App() {
     <div className="App">
       <header className="App-header">
         <button onClick={() => handleSignIn(googleProvider)}>Google</button> 
+        <button onClick={() => handleSignIn(facebookProvider)}>Facebook</button> 
+        <button onClick={() => handleSignIn(githubProvider)}>Github</button> 
         <button onClick={() => handleSignOut()}>Sign Out</button> 
         <img src={logo} className="App-logo" alt="logo" />
         <p>

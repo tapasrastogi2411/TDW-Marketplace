@@ -8,6 +8,7 @@ export const signInToApp = (provider) => {
   return signInWithPopup(auth, provider).then((res) => { 
     return res.user; 
   }).catch((err) => { 
+    console.log(err); 
     return err; 
   }); 
 }; 
