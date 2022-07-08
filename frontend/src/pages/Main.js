@@ -1,11 +1,8 @@
-import logo from './logo.svg';
-import './App.css';
-
-import Header from './components/Header.js'
-import Listing from './components/Listing.js'
+import Header from '../components/Header.js'
+import Listing from '../components/Listing.js'
 
 
-function App() {
+function Main() {
   // TODO: remove mock data
   const exampleListing = {
     "imageUrl": "https://media.kijiji.ca/api/v1/ca-prod-fsbo-ads/images/b9/b96ec292-db9e-4b93-ad61-7c486e54cad2?rule=kijijica-640-webp",
@@ -21,22 +18,8 @@ function App() {
       <Listing details={exampleListing}></Listing>
       <Listing details={exampleListing}></Listing>
       <Listing details={exampleListing}></Listing>
-      {/* <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header> */}
     </div>
   );
 }
 
-export default App;
+export default Main;
