@@ -6,15 +6,15 @@ export default function Listing(props) {
        <div className="flex justify-between	">
             <img className="max-h-36 max-w-md" src={props.details.imageUrl}></img>
             <div className="w-2/5 ml-3 flex-row">
-                <div className="font-bold">{props.details.itemName}</div>
+                <div className="font-semibold">{props.details.itemName}</div>
                 <div className="mt-9">{props.details.itemDescription}</div>
             </div>
             <div className="">
-                <div className="font-bold">Starting bid:</div>
+                <div className="font-semibold">Starting bid:</div>
                 <div className="mt-9">{props.details.startingBid}</div>
             </div>
             <div className="">
-                <div className="font-bold">Date of bid:</div>
+                <div className="font-semibold">Date of bid:</div>
                 <div className="mt-9">{props.details.dateOfBid}</div>
             </div>
             <div className="flex items-center ml-4 mr-2">

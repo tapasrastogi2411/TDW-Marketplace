@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import Main from './pages/Main';
 import Login from './pages/Login';
+import AddItem from './pages/AddItem';
 
 import reportWebVitals from './reportWebVitals';
 import {
@@ -18,7 +19,8 @@ root.render(
       <Route path="/" element={<Main />}>
       </Route>
       <Route path="login" element={<Login />}>
-        </Route>
+      </Route>
+      <Route path="listing/new" element={<AddItem />}></Route>
     </Routes>
   </BrowserRouter>
 );
