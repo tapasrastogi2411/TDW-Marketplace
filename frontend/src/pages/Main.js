@@ -14,10 +14,10 @@ function Main() {
   
   return (
     <div className="App">
-      <Header></Header>
-      <Listing details={exampleListing}></Listing>
-      <Listing details={exampleListing}></Listing>
-      <Listing details={exampleListing}></Listing>
+      <Header />
+      <Listing details={exampleListing} />
+      <Listing details={exampleListing} />
+      <Listing details={exampleListing} />
     </div>
   );
 }
