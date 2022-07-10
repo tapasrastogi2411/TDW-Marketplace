@@ -24,10 +24,7 @@ function App() {
         <button onClick={() => handleSignIn(googleProvider)}>Google</button> 
         <button onClick={() => handleSignIn(facebookProvider)}>Facebook</button> 
         <button onClick={() => handleSignIn(githubProvider)}>Github</button> 
-        <button onClick={() => {microsoftProvider.setCustomParameters({
-          prompt: "consent",
-          tenant: "4ea69acb-08af-44a4-865f-1a4b43829c24",
-          }); 
+        <button onClick={() => {
           handleSignIn(microsoftProvider)}}>Microsoft</button> 
         <button onClick={() => handleSignOut()}>Sign Out</button> 
         <img src={logo} className="App-logo" alt="logo" />
