@@ -8,13 +8,19 @@ export default function Login(props) {
     providerName: "Google",
   };
 
+  const microsoftProviderDetail = {
+    icon: "https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/media/microsoft_logo.svg",
+    providerName: "Microsoft",
+  };
+
   return (
     <div>
       <Header />
-      <div class="text-center text-xl mb-4 font-medium">
+      <div className="text-center text-xl mb-4 font-medium">
         Sign in with any of the following:
       </div>
       <LoginProvider details={googleProviderDetail} />
+      <LoginProvider details={microsoftProviderDetail} />
     </div>
   );
 }
