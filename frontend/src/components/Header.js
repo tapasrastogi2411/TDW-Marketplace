@@ -17,8 +17,6 @@ export default function Header() {
 
   return (
     <div className="h-14 w-full flex justify-center p-1 mb-2 bg-blue-200">
-      {/* TODO: if signed in show signout, signed out show signin */}
-
       {!currentUser ? (
         <div className="ml-auto mr-3 self-center">
           <Link
