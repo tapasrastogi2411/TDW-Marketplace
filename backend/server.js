@@ -14,7 +14,7 @@ const serviceAccount = require("./firebase-admin.json");
 const googleOAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
-  "http://localhost:3000"
+  ""
 );
 
 admin.initializeApp({
@@ -35,10 +35,10 @@ const verifyFirebaseTokenMiddleware = (req, res, next) => {
         next();
       })
       .catch((error) => {
-        return res.status(404).end("User not found with token");
+        return res.status(404).json({ error: "User not found with token" });
       });
   } else {
-    return res.status(401).end("No authorization token provided");
+    return res.status(401).json({ error: "No authorization token provided" });
   }
 };
 
@@ -53,24 +53,45 @@ app.get("/", function (req, res, next) {
 });
 
 app.post("/api/tasks/google_calendar", async function (req, res, next) {
-  googleOAuth2Client.setCredentials({ refresh_token: req.authToken });
-  // TODO: issue here using their refresh token to create event errors out
+  let authToken = req.headers["authorization"];
+  if (!authToken) {
+    return res.status(401).json({ error: "No authorization token provided" });
+  }
+  if (!authToken.startsWith("Bearer ")) {
+    return res
+      .status(409)
+      .json({ error: "Authorization is not a bearer token" });
+  }
+  authToken = authToken.replace("Bearer ", "");
+  googleOAuth2Client.setCredentials({ refresh_token: authToken });
+
   // TODO: make this into a worker
-  const response = await google.calendar("v3").events.insert({
-    auth: googleOAuth2Client,
-    calendarId: "primary",
-    requestBody: {
-      summary: "test summary",
-      description: "test description",
-      start: {
-        dateTime: Date.now(),
+  // TODO: details of the actual event should come from database
+  let googleResponse = null;
+  try {
+    googleResponse = await google.calendar("v3").events.insert({
+      auth: googleOAuth2Client,
+      calendarId: "primary",
+      requestBody: {
+        start: {
+          dateTime: new Date(),
+        },
+        end: {
+          dateTime: new Date(Date.now() + 60 * 60 * 1000),
+        },
+        description: "placeholder description",
       },
-      end: {
-        dateTime: Date.now() + 100,
-      },
-    },
-  });
-  console.log("response? : ", response);
+    });
+    if (googleResponse.status === 200) {
+      return res
+        .status(200)
+        .json({ message: "successfully created google event" });
+    }
+  } catch (err) {
+    return res
+      .status(err.response.status)
+      .json({ error: err.response.statusText });
+  }
   next();
 });
 
