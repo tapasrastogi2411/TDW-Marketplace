@@ -1,8 +1,18 @@
 import React from "react";
+import { getCurrentUser } from "../service/auth";
+import Cookies from "js-cookie";
+const axios = require("axios").default;
 
 export default function Listing(props) {
-  function createListing() {
-    console.log("creating listing");
+  function scheduleEvent() {
+    const refresh = Cookies.get("refresh");
+    const config = {
+      headers: { Authorization: `Bearer ${refresh}` },
+    };
+    axios
+      .post("http://localhost:5001/api/tasks/google_calendar", {}, config)
+      .then(console.log)
+      .catch(console.log);
   }
   return (
     <div className="w-11/12 ml-auto mr-auto border-black border p-3 mb-5 mt-3">
@@ -25,21 +35,21 @@ export default function Listing(props) {
           <div className="mt-9">{props.details.dateOfBid}</div>
         </div>
         <div className="flex items-center ml-4 mr-2">
-          {/* TODO: fix this to call api */}
-          <a className="bg-purple-300 p-2 rounded-md" href="">
-            {" "}
-            Add to calendar
-          </a>
-        </div>
-        <div className="flex items-center ml-4 mr-2">
           {/* TODO: button for starting video bidding session? */}
           <button
             className="bg-purple-300 p-2 rounded-md"
-            onClick={createListing()}
+            onClick={() => scheduleEvent()}
           >
             {" "}
-            More details
+            Add to calendar
           </button>
+        </div>
+        <div className="flex items-center ml-4 mr-2">
+          {/* TODO: fix this to call api */}
+          <a className="bg-purple-300 p-2 rounded-md" href="">
+            {" "}
+            More details
+          </a>
         </div>
       </div>
     </div>
