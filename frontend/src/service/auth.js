@@ -29,4 +29,3 @@ export const signOutOfApp = () => {
 export const getCurrentUser = () => {
   return auth.currentUser;
 };
-

@@ -1,4 +1,6 @@
 import React from "react";
+import { v1 as uuid } from "uuid";
+import { Link } from "react-router-dom";
 
 export default function Listing(props) {
   return (
@@ -19,10 +21,12 @@ export default function Listing(props) {
         </div>
         <div className="flex items-center ml-4 mr-2">
           {/* TODO: button for starting video bidding session? */}
-          <a className="bg-purple-300 p-2 rounded-md" href="">
-            {" "}
+          <Link
+            to={`/auction_session/${uuid()}`}
+            className="bg-black px-3 py-1 text-white rounded-md"
+          >
             More details
-          </a>
+          </Link>
         </div>
       </div>
     </div>
