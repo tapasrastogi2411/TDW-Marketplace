@@ -23,12 +23,13 @@ export default function JoinAuction() {
 
         // fetch existing users in room
         socket.current.on("otherUsersInAuction", (otherUsers) => {
-          let inAuction = [];
+          console.log(socket.current.id); 
+          const inAuction = [];
           otherUsers.forEach((userId) => {
-            let user = new Peer({
+            const user = new Peer({
               initiator: true,
               trickle: false,
-              mediaStream,
+              stream: mediaStream,
             });
             user.on("signal", (signal) => {
               socket.current.emit("sendingSignal", {
@@ -45,10 +46,10 @@ export default function JoinAuction() {
 
         //
         socket.current.on("userJoinedAuction", (data) => {
-          let user = new Peer({
+          const user = new Peer({
             initiator: false,
             trickle: false,
-            mediaStream,
+            stream: mediaStream,
           });
           user.on("signal", (signal) => {
             socket.current.emit("receivedSignal", {
@@ -58,29 +59,33 @@ export default function JoinAuction() {
           });
           user.signal(data.signal);
           peers.current.push({ userId: data.userJoined, user });
-
-          setPeersUpdate(peersUpdate.push(user));
+          
+          setPeersUpdate(users => [...users, user]);
         });
 
         socket.current.on("gotSignal", (data) => {
           const userIndex = peers.current.findIndex(
             (user) => user.userId === data.id
           );
+          console.log(peers.current[userIndex].user); 
           if (userIndex !== -1) {
-            peers.current[userIndex].peer.signal(data.signal);
+            peers.current[userIndex].user.signal(data.signal);
           }
         });
       });
-  }, []);
+  }, [auctionId]);
 
-  const RenderVideo = (props) => {
-    const peer = useRef();
+  const RenderVideo = (props) => { 
+    const ref = useRef();
+
     useEffect(() => {
-      props.data.on("stream", (stream) => {
-        peer.current.srcObject = stream;
+      props.peer.on("stream", (stream) => {
+        console.log("here 2", props.peer); 
+        ref.current.srcObject = stream;
       });
-    }, []);
-    return <video ref={peer} autoPlay playsInline />;
+    }, [props.peer]);
+
+    return (<video ref={ref} autoPlay playsInline />);
   };
 
   return (
@@ -97,8 +102,10 @@ export default function JoinAuction() {
         autoPlay
         playsInline
       />
-      {peersUpdate.map((data, index) => {
-        return <RenderVideo key={index} data={data} />;
+      {console.log(peers)}
+      {console.log(peersUpdate)}
+      {peersUpdate.map((peer) => {
+        return <RenderVideo peer={peer} />;
       })}
     </div>
   );
