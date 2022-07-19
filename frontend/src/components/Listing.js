@@ -10,7 +10,7 @@ export default function Listing(props) {
       headers: { Authorization: `Bearer ${refresh}` },
     };
     axios
-      .post("http://localhost:5001/api/tasks/google_calendar", {}, config)
+      .post("http://localhost:5000/api/tasks/google_calendar", {}, config)
       .then(console.log)
       .catch(console.log);
   }
