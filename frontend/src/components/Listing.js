@@ -1,9 +1,10 @@
 import React from "react";
 import { getCurrentUser } from "../service/auth";
 import Cookies from "js-cookie";
-const axios = require("axios").default;
 import { v1 as uuid } from "uuid";
 import { Link } from "react-router-dom";
+
+const axios = require("axios").default;
 
 export default function Listing(props) {
   function scheduleEvent() {
@@ -12,7 +13,7 @@ export default function Listing(props) {
       headers: { Authorization: `Bearer ${refresh}` },
     };
     axios
-      .post("http://localhost:5000/api/tasks/google_calendar", {}, config)
+      .post("/api/tasks/google_calendar", {}, config)
       .then(console.log)
       .catch(console.log);
   }
