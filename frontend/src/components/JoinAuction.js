@@ -3,6 +3,18 @@ import io from "socket.io-client";
 import Peer from "simple-peer";
 import { useParams } from "react-router-dom";
 
+const RenderVideo = (props) => { 
+  const ref = useRef();
+
+  useEffect(() => {
+    props.peer.on("stream", (stream) => {
+      ref.current.srcObject = stream;
+    });
+  }, [props.peer]);
+
+  return (<video style={{ height: "300px", width: "300px" }} ref={ref} autoPlay playsInline />);
+};
+
 export default function JoinAuction() {
   const { auctionId } = useParams();
   const socket = useRef();
@@ -23,7 +35,6 @@ export default function JoinAuction() {
 
         // fetch existing users in room
         socket.current.on("otherUsersInAuction", (otherUsers) => {
-          console.log(socket.current.id); 
           const inAuction = [];
           otherUsers.forEach((userId) => {
             const user = new Peer({
@@ -67,26 +78,12 @@ export default function JoinAuction() {
           const userIndex = peers.current.findIndex(
             (user) => user.userId === data.id
           );
-          console.log(peers.current[userIndex].user); 
           if (userIndex !== -1) {
             peers.current[userIndex].user.signal(data.signal);
           }
         });
       });
   }, [auctionId]);
-
-  const RenderVideo = (props) => { 
-    const ref = useRef();
-
-    useEffect(() => {
-      props.peer.on("stream", (stream) => {
-        console.log("here 2", props.peer); 
-        ref.current.srcObject = stream;
-      });
-    }, [props.peer]);
-
-    return (<video ref={ref} autoPlay playsInline />);
-  };
 
   return (
     <div
@@ -102,10 +99,8 @@ export default function JoinAuction() {
         autoPlay
         playsInline
       />
-      {console.log(peers)}
-      {console.log(peersUpdate)}
-      {peersUpdate.map((peer) => {
-        return <RenderVideo peer={peer} />;
+      {peersUpdate.map((peer, index) => {
+        return <RenderVideo key={index} peer={peer} />;
       })}
     </div>
   );
