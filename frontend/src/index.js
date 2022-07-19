@@ -4,6 +4,7 @@ import "./index.css";
 import Main from "./pages/Main";
 import Login from "./pages/Login";
 import AddItem from "./pages/AddItem";
+import JoinAuction from "./components/JoinAuction";
 
 import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -13,10 +14,12 @@ root.render(
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Main />}></Route>
+      <Route path="/auction_session/:auctionId" element={<JoinAuction />} />
       <Route path="login" element={<Login />}></Route>
       <Route path="listing/new" element={<AddItem />}></Route>
     </Routes>
-  </BrowserRouter>
+  </BrowserRouter>,
+  document.getElementById("root")
 );
 
 // If you want to start measuring performance in your app, pass a function

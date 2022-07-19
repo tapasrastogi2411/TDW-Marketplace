@@ -2,6 +2,8 @@ import React from "react";
 import { getCurrentUser } from "../service/auth";
 import Cookies from "js-cookie";
 const axios = require("axios").default;
+import { v1 as uuid } from "uuid";
+import { Link } from "react-router-dom";
 
 export default function Listing(props) {
   function scheduleEvent() {
@@ -44,12 +46,13 @@ export default function Listing(props) {
             Add to calendar
           </button>
         </div>
-        <div className="flex items-center ml-4 mr-2">
-          {/* TODO: fix this to call api */}
-          <a className="bg-purple-300 p-2 rounded-md" href="">
-            {" "}
+        <div className="flex items-center ml-4 mr-2">          
+          <Link
+            to={`/auction_session/${uuid()}`}
+            className="bg-black px-3 py-1 text-white rounded-md"
+          >
             More details
-          </a>
+          </Link>
         </div>
       </div>
     </div>
