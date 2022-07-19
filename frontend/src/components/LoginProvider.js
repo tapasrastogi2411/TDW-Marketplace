@@ -1,9 +1,9 @@
 import React from "react";
-import { signInToApp, signOutOfApp, getCurrentUser } from "../service/auth";
+import { signInToApp, getCurrentUser } from "../service/auth";
 import {
   googleProvider,
-  facebookProvider,
-  githubProvider,
+  // facebookProvider,
+  // githubProvider,
   microsoftProvider,
 } from "../config/authMethods";
 import { useNavigate } from "react-router-dom";
@@ -28,7 +28,11 @@ export default function LoginProvider(props) {
       className="flex justify-center items-center border w-1/4 ml-auto mr-auto border-current py-3 rounded-3xl	mt-3	"
     >
       <div>
-        <img className="w-8 h-8" src={props.details.icon} />
+        <img
+          className="w-8 h-8"
+          src={props.details.icon}
+          alt={props.details.providerName}
+        />
       </div>
       <div className="ml-3"> Continue with {props.details.providerName}</div>
     </button>
