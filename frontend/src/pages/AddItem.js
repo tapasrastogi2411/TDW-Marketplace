@@ -1,11 +1,35 @@
 import React from "react";
 import Header from "../components/Header";
+import { useState } from "react";
+import Cookies from "js-cookie";
+const axios = require("axios").default;
 
 export default function AddItem(props) {
+  const [name, setName] = useState(" ");
+  const refresh = Cookies.get("refresh");
+  const config = {
+    headers: { Authorization: `Bearer ${refresh}` },
+  };
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const product = { name };
+      const res = await axios.post("/products/addProduct/", product, config);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const changeName = (e) => {
+    e.preventDefault();
+    setName(e.target.value);
+  };
+
   return (
     <div>
       <Header />
-      <form className="ml-10">
+      <form className="ml-10" onSubmit={onSubmit}>
         <div className="font-medium text-lg mb-5 ">Add an item:</div>
         <div className="pb-5">
           <label>
@@ -16,6 +40,7 @@ export default function AddItem(props) {
               type="text"
               name="productName"
               placeholder="eg. Round table"
+              onChange={(e) => changeName(e)}
             />
           </label>
         </div>
