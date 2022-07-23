@@ -1,4 +1,2 @@
 image-pull-secret.yaml
-backend.yaml
-frontend.yaml 
 sa.yaml

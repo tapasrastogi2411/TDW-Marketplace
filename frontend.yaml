@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: 2001199819781973/team-tdw:tdwfrontend
+          ports:
+            - containerPort: 3000
+      imagePullSecrets:
+        - name: regsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: frontend
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000

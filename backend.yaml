@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  labels:
+    app: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: 2001199819781973/team-tdw:tdwbackend
+          ports:
+            - containerPort: 5000
+      imagePullSecrets:
+        - name: regsecret
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app.kubernetes.io/name: backend
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
