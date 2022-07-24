@@ -21,4 +21,18 @@ module.exports = function (app) {
       changeOrigin: true,
     })
   );
+  app.use(
+    "/products/getProducts",
+    createProxyMiddleware({
+      target: "http://localhost:5000",
+      changeOrigin: true,
+    })
+  );
+  app.use(
+    "/products/updateProduct",
+    createProxyMiddleware({
+      target: "http://localhost:5000",
+      changeOrigin: true,
+    })
+  );
 };
