@@ -4,9 +4,11 @@ import { useState } from "react";
 import Cookies from "js-cookie";
 import {getCurrentUser } from "../service/auth";
 import { v1 as uuid } from "uuid";
+import { useNavigate } from "react-router-dom";
 const axios = require("axios").default;
 
 export default function AddItem(props) {
+  const navigate = useNavigate();
   const [name, setName] = useState(" ");
   const [description, setDescription] = useState(" ");
   const [startingBid, setStartingBid] = useState(" ");
@@ -26,6 +28,7 @@ export default function AddItem(props) {
         const roomStatus = false; 
         const product = { name, uid, startingBid, description, roomId, biddingDate, roomStatus };
         await axios.post("/products/addProduct/", product, config);
+        navigate("/");
       }
       else { 
         //TODO: Change this to have a proper error message at top which says to sign in! (make a reusable component)
@@ -95,7 +98,7 @@ export default function AddItem(props) {
               className="bg-gray-300 pl-3 pr-16 rounded py-1"
               type="text"
               name="startingBid"
-              placeholder="$50"
+              placeholder="eg. 50"
               onChange={(e) => changeStartingBid(e)}
             />
           </label>

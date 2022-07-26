@@ -7,7 +7,6 @@ const axios = require("axios").default;
 
 export default function Listing(props) {
   const { user, setUser } = useContext(UserContext);
-  console.log(props.details);
 
   function scheduleEvent() {
     const refresh = Cookies.get("refresh");
@@ -19,7 +18,7 @@ export default function Listing(props) {
       .then(console.log)
       .catch(console.log);
   }
-
+  // TODO: Probably want to check for authorization in the backend when trying to delete, start auction, and end auction 
   const startAuction = async () => {
     try {
       await axios.put("/products/updateProduct", {
@@ -32,10 +31,40 @@ export default function Listing(props) {
         startingBid: props.details.startingBid,
         uid: props.details.uid,
       });
+      props.refetch(); 
     } catch (err) {
       console.log(err);
     }
   };
+
+  const stopAuction = async () => { 
+    try {
+      await axios.put("/products/updateProduct", {
+        id: props.details._id,
+        roomStatus: false,
+        biddingDate: props.details.biddingDate,
+        description: props.details.description,
+        name: props.details.name,
+        roomId: props.details.roomId,
+        startingBid: props.details.startingBid,
+        uid: props.details.uid,
+      });
+      props.refetch(); 
+      //TODO: probably want to remove all people currently in the room and give them an appropriate error message ! 
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  const deleteListing = async () => { 
+    try { 
+      await axios.delete("/products/deleteProduct/" + props.details._id);
+      props.refetch(); 
+    }
+    catch (err) { 
+      console.log(err); 
+    }
+  }
 
   return (
     <div className="w-11/12 ml-auto mr-auto border-black border p-3 mb-5 mt-3">
@@ -58,7 +87,6 @@ export default function Listing(props) {
           <div className="mt-9">{props.details.biddingDate}</div>
         </div>
         <div className="flex items-center ml-4 mr-2">
-          {/* TODO: button for starting video bidding session? */}
           <button
             className="bg-purple-300 p-2 rounded-md"
             onClick={() => scheduleEvent()}
@@ -78,12 +106,30 @@ export default function Listing(props) {
             user &&
             user.uid === props.details.uid && (
               <button
-                className="bg-purple-300 p-2 rounded-md"
+                className="bg-black px-3 py-1 text-white rounded-md"
                 onClick={() => startAuction()}
               >
                 Start Auction
               </button>
             )}
+          {props.details.roomStatus === true &&
+            user &&
+            user.uid === props.details.uid && (
+              <button
+                className="bg-black px-3 py-1 text-white rounded-md"
+                onClick={() => stopAuction()}
+              >
+                Stop Auction
+              </button>
+            )}
+          {user && user.uid === props.details.uid && ( 
+            <button
+                className="bg-red-500 px-3 py-1 text-white rounded-md"
+                onClick={() => deleteListing()}
+              >
+                Delete
+              </button>
+          )}
         </div>
       </div>
     </div>

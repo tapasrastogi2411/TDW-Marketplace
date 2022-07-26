@@ -1,25 +1,23 @@
 import Header from "../components/Header.js";
 import Listing from "../components/Listing.js";
 import { Link } from "react-router-dom";
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React from "react";
+import { useQuery } from "react-query";
+
 const axios = require("axios").default;
 
 function Main() {
-  const [products, setProducts] = useState([]); 
 
-  useEffect(() => { 
-    async function fetchProducts(){ 
-      try {   
-        const res = await axios.get("/products/getProducts"); 
-        setProducts(res.data); 
-      }
-      catch(err) { 
-        console.log(err); 
-      }
+  const fetchProducts = async () => {
+    try { 
+      return await axios.get("/products/getProducts");
     } 
-    fetchProducts(); 
-  }, []); 
+    catch (err) { 
+      console.log(err); 
+    }
+  };
+
+  const { data, status, error, refetch } = useQuery("products", fetchProducts);
 
   return (
     <div className="Main">
@@ -34,12 +32,17 @@ function Main() {
           </Link>
         </div>
       </div>
-      {products.map((product, index) => { 
-        return <Listing key={index} details={product}/>
-      })}
+      {status === "error" && <p>{error}</p>}
+      {status === "loading" && <p>Fetching Data...</p>}
+      {status === "success" && (
+        <div>
+          {data.data.map((product, index) => {
+            return <Listing refetch={refetch} key={index} details={product} />;
+          })}{" "}
+        </div>
+      )}
     </div>
   );
-
 }
 
 export default Main;

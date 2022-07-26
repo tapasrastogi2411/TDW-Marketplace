@@ -1,5 +1,4 @@
-import React, {useContext} from "react";
-import { signInToApp, getCurrentUser } from "../service/auth";
+import { signInToApp } from "../service/auth";
 import {
   googleProvider,
   // facebookProvider,
@@ -7,18 +6,13 @@ import {
   microsoftProvider,
 } from "../config/authMethods";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../App";
 
 export default function LoginProvider(props) {
-  const {user, setUser} = useContext(UserContext); 
   const navigate = useNavigate();
+
   const handleSignIn = async (provider) => {
     await signInToApp(provider);
-    const currentUser = getCurrentUser();
-    setUser(currentUser);
-    if (currentUser) {
-      navigate("/");
-    }
+    navigate("/");
   };
 
   const providers = {
