@@ -20,7 +20,6 @@ router.route("/addProduct").post(async (req, res) => {
       roomId, 
       roomStatus
     });
-    console.log(newProduct); 
     const SavedProduct = await newProduct.save();
     res.json(SavedProduct);
   } catch (err) {
@@ -38,7 +37,6 @@ router.route("/getProducts").get(async (req, res) => {
 });
 
 router.route("/updateProduct").put(async (req, res) => {
-  console.log("here"); 
   var id = req.body.id;  
   var name = req.body.name;
   var uid = req.body.uid; 
@@ -59,6 +57,15 @@ router.route("/updateProduct").put(async (req, res) => {
   }
 }); 
 
-
+router.route("/deleteProduct/:id/").delete(async (req, res) => {
+  var id = req.params.id;   
+  try { 
+    const deletedProduct = await Product.deleteOne({_id: id});
+    res.json(deletedProduct); 
+  }
+  catch { 
+    res.status(500).json({error: err.message}); 
+  }
+}); 
 
 module.exports = router;
