@@ -35,7 +35,7 @@ export default function Header() {
           to="/"
           className="bg-black px-3 py-1 text-white rounded-md"
         >
-          <img alt="Logo" src="../images/tdwmarketlogo.png"></img>
+          <img alt="Logo" src="/tdwmarketlogo.png"></img>
         </Link>
       </div>
       {!user ? (
