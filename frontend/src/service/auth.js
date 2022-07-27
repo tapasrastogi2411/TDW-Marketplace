@@ -1,18 +1,22 @@
 import {
+  browserSessionPersistence,
   getAuth,
   GoogleAuthProvider,
+  setPersistence,
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import app from "../config/firebase-config";
+import {app} from "../config/firebase-config";
 import Cookies from "js-cookie";
 
 const auth = getAuth(app);
 
 //signin
 export const signInToApp = (provider) => {
-  return signInWithPopup(auth, provider)
-    .then((res) => {
+  //makes it so user is not automatically logged out unless window changes. 
+  setPersistence(auth, browserSessionPersistence).then(async () => { 
+    try {
+      const res = await signInWithPopup(auth, provider);
       if (res.user.providerData[0].providerId === "google.com") {
         // TODO: secure the cookie
         Cookies.set(
@@ -21,17 +25,20 @@ export const signInToApp = (provider) => {
         );
       }
       return res.user;
-    })
-    .catch((err) => {
+    } catch (err) {
       console.log(err);
       return err;
-    });
+    }
+  }).catch((err) => { 
+    console.log(err); 
+    return err; 
+  })
 };
 
 export const signOutOfApp = () => {
   signOut(auth)
     .then(() => {
-      // Sign-out successful.
+      // Sign-out successful
     })
     .catch((err) => {
       // An error happened.

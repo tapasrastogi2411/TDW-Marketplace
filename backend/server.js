@@ -1,6 +1,8 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const app = express();
 const { google } = require("googleapis");
+
 require("dotenv").config();
 
 const bodyParser = require("body-parser");
@@ -17,6 +19,27 @@ const googleOAuth2Client = new google.auth.OAuth2(
   ""
 );
 
+const uri = process.env.ATLAS_URI;  
+
+//setting up database 
+mongoose.connect(uri,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
+
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "connection error: "));
+db.once("open", function () {
+  console.log("MongoDb Connected successfully");
+});
+
+const productsRouter = require('./routes/products');
+app.use('/products', productsRouter); 
+
+
+//for oauth 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://team-tdw-default-rtdb.firebaseio.com",
@@ -43,7 +66,7 @@ const verifyFirebaseTokenMiddleware = (req, res, next) => {
 };
 
 const http = require("http");
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 server = http.createServer(app);
 
@@ -101,7 +124,6 @@ app.post("/api/tasks/google_calendar", async function (req, res, next) {
   }
   next();
 });
-
 
 let auctionToUser = {};
 

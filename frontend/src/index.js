@@ -1,24 +1,13 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import App from "./App"
 import "./index.css";
-import Main from "./pages/Main";
-import Login from "./pages/Login";
-import AddItem from "./pages/AddItem";
-import JoinAuction from "./components/JoinAuction";
 
 import reportWebVitals from "./reportWebVitals";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<Main />}></Route>
-      <Route path="/auction_session/:auctionId" element={<JoinAuction />} />
-      <Route path="login" element={<Login />}></Route>
-      <Route path="listing/new" element={<AddItem />}></Route>
-    </Routes>
-  </BrowserRouter>,
+  <App/>,
   document.getElementById("root")
 );
 
