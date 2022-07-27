@@ -66,7 +66,7 @@ const verifyFirebaseTokenMiddleware = (req, res, next) => {
 };
 
 const http = require("http");
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
 server = http.createServer(app);
 

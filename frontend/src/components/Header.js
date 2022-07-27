@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { signOutOfApp } from "../service/auth";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../App";
-import app from "../config/firebase-config";
+import {app} from "../config/firebase-config";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default function Header() {

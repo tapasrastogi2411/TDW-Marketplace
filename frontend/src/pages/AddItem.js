@@ -2,9 +2,11 @@ import React from "react";
 import Header from "../components/Header";
 import { useState } from "react";
 import Cookies from "js-cookie";
-import {getCurrentUser } from "../service/auth";
+import { getCurrentUser } from "../service/auth";
 import { v1 as uuid } from "uuid";
 import { useNavigate } from "react-router-dom";
+import { storage } from "../config/firebase-config";
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 const axios = require("axios").default;
 
 export default function AddItem(props) {
@@ -13,30 +15,57 @@ export default function AddItem(props) {
   const [description, setDescription] = useState(" ");
   const [startingBid, setStartingBid] = useState(" ");
   const [biddingDate, setBiddingDate] = useState(" ");
+  const [image, setImage] = useState(" ");
+  const [progress, setProgress] = useState(0); 
   const refresh = Cookies.get("refresh");
   const config = {
     headers: { Authorization: `Bearer ${refresh}` },
   };
 
+
   const onSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const user = getCurrentUser(); 
-      if (user) { 
-        const roomId = uuid(); 
-        const uid = user.uid; 
-        const roomStatus = false; 
-        const product = { name, uid, startingBid, description, roomId, biddingDate, roomStatus };
-        await axios.post("/products/addProduct/", product, config);
-        navigate("/");
+
+    const randomName = uuid();
+    const storageRef = ref(storage, `/images/${randomName}`);
+    const uploadTask = uploadBytesResumable(storageRef, image);
+    uploadTask.on(
+      "state_changes",
+      (snapshot) => {
+        const prog = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100); 
+        setProgress(prog); 
+      },
+      (err) => console.log(err),
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then(async (url) => {
+          try {
+            const user = getCurrentUser();
+            if (user) {
+              const roomId = uuid();
+              const uid = user.uid;
+              const roomStatus = false;
+              const product = {
+                name,
+                uid,
+                startingBid,
+                description,
+                roomId,
+                biddingDate,
+                roomStatus,
+                productImage: url,
+              };
+              await axios.post("/products/addProduct/", product, config);
+              navigate("/");
+            } else {
+              //TODO: Change this to have a proper error message at top which says to sign in! (make a reusable component)
+              console.log("No user signed in!");
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        });
       }
-      else { 
-        //TODO: Change this to have a proper error message at top which says to sign in! (make a reusable component)
-        console.log("No user signed in!"); 
-      }
-    } catch (err) {
-      console.log(err);
-    }
+    );
   };
 
   const changeName = (e) => {
@@ -59,6 +88,11 @@ export default function AddItem(props) {
     setBiddingDate(e.target.value);
   };
 
+  const changeProductImage = (e) => {
+    e.preventDefault();
+    console.log(e.target.files);
+    setImage(e.target.files[0]);
+  };
   return (
     <div>
       <Header />
@@ -89,6 +123,22 @@ export default function AddItem(props) {
               onChange={(e) => changeDescription(e)}
             />
           </label>
+        </div>
+        <div className="pb-5">
+          <label>
+            Product Image
+            <br />
+            <input
+              className="bg-gray-300 pl-3 pr-16 rounded py-1"
+              type="file"
+              name="productImage"
+              placeholder="Please upload a image."
+              onChange={(e) => changeProductImage(e)}
+            />
+          </label>
+        </div>
+        <div className="pb-5">
+          <h3>Uploaded {progress} %</h3>
         </div>
         <div className="pb-5">
           <label>

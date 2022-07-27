@@ -52,6 +52,13 @@ const productSchema = new Schema(
       unique: false, 
       trim: true, 
       minlength: 0, 
+    }, 
+    productImage: { 
+      type: String, 
+      required: false,
+      unique: false, 
+      trim: true, 
+      minlength: 0, 
     }
   },
   {

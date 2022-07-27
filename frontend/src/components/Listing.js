@@ -71,7 +71,7 @@ export default function Listing(props) {
       <div className="flex justify-between	">
         <img
           className="max-h-36 max-w-md"
-          src={props.details.imageUrl}
+          src={props.details.productImage}
           alt="item for listing"
         ></img>
         <div className="w-2/5 ml-3 flex-row">

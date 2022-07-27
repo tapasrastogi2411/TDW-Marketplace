@@ -11,6 +11,7 @@ router.route("/addProduct").post(async (req, res) => {
     var biddingDate = req.body.biddingDate; 
     var roomId = req.body.roomId; 
     var roomStatus = req.body.roomStatus; 
+    var productImage = req.body.productImage; 
     const newProduct = new Product({
       name, 
       uid, 
@@ -18,7 +19,8 @@ router.route("/addProduct").post(async (req, res) => {
       description, 
       biddingDate, 
       roomId, 
-      roomStatus
+      roomStatus, 
+      productImage
     });
     const SavedProduct = await newProduct.save();
     res.json(SavedProduct);

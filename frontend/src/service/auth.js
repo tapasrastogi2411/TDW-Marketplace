@@ -6,7 +6,7 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import app from "../config/firebase-config";
+import {app} from "../config/firebase-config";
 import Cookies from "js-cookie";
 
 const auth = getAuth(app);
