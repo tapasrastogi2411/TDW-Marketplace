@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
 import { useParams } from "react-router-dom";
-import Config from "../config.json";
 
 const RenderVideo = (props) => { 
   const ref = useRef();
