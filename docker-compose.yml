@@ -26,18 +26,6 @@ services:
         - DEFAULT_EMAIL=${EMAIL}
 
   frontend:
-    build:
-      context: frontend
-      args:
-        - REACT_APP_BUCKET_URL=${REACT_APP_BUCKET_URL}
-        - REACT_APP_API_KEY=${REACT_APP_API_KEY}
-        - REACT_APP_AUTH_DOMAIN=${REACT_APP_AUTH_DOMAIN}
-        - REACT_APP_PROJECT_ID=${REACT_APP_PROJECT_ID}
-        - REACT_APP_STORAGE_BUCKET=${REACT_APP_STORAGE_BUCKET}
-        - REACT_APP_MESSAGING_SENDER_ID=${REACT_APP_MESSAGING_SENDER_ID}
-        - REACT_APP_APP_ID=${REACT_APP_APP_ID}
-        - REACT_APP_MEASUREMENT_ID=${REACT_APP_MEASUREMENT_ID}
-        - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
     image: frontend
     container_name: tdwmarket-frontend
     restart: always
@@ -60,8 +48,8 @@ services:
     ports: 
       - 5000:5000
     environment:
-      - VIRTUAL_HOST_BACKEND=${VIRTUAL_HOST_BACKEND}
-      - LETSENCRYPT_HOST_BACKEND=${LETSENCRYPT_HOST_BACKEND}
+      - VIRTUAL_HOST=${VIRTUAL_HOST_BACKEND}
+      - LETSENCRYPT_HOST=${LETSENCRYPT_HOST_BACKEND}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - ATLAS_URI=${ATLAS_URI}
@@ -74,4 +62,4 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ./database/mongodb:/data/db
+      - ../database/mongodb:/data/db
