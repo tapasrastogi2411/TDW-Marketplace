@@ -24,7 +24,7 @@ export default function JoinAuction() {
   const [peersUpdate, setPeersUpdate] = useState([]);
 
   useEffect(() => {
-    socket.current = io.connect("/");
+    socket.current = io.connect("https://api.tdwmarket.me/");
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((mediaStream) => {

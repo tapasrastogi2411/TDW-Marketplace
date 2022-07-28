@@ -72,7 +72,12 @@ const PORT = process.env.PORT || 5000;
 
 server = http.createServer(app);
 
-const io = require("socket.io")(server);
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "https://tdwmarket.me",
+    methods: ["GET", "POST"],
+  }
+});
 
 app.use(function (req, res, next) {
   console.log("HTTP request", req.method, req.url, req.body);
