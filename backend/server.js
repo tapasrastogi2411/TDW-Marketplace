@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 const { google } = require("googleapis");
+const cors = require('cors'); 
+app.use(cors()); 
 
 require("dotenv").config();
 

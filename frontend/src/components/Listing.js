@@ -2,8 +2,11 @@ import React, { useContext } from "react";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 import { UserContext } from "../App";
+import { storage } from "../config/firebase-config";
+import { ref, deleteObject } from "firebase/storage"
 
-const axios = require("axios").default;
+// const axios = require("axios").default;
+import Axios from '../axiosBaseURL'
 
 export default function Listing(props) {
   const { user, setUser } = useContext(UserContext);
@@ -13,7 +16,7 @@ export default function Listing(props) {
     const config = {
       headers: { Authorization: `Bearer ${refresh}` },
     };
-    axios
+    Axios
       .post("/api/tasks/google_calendar", {}, config)
       .then(console.log)
       .catch(console.log);
@@ -21,7 +24,7 @@ export default function Listing(props) {
   // TODO: Probably want to check for authorization in the backend when trying to delete, start auction, and end auction 
   const startAuction = async () => {
     try {
-      await axios.put("/products/updateProduct", {
+      await Axios.put("/products/updateProduct", {
         id: props.details._id,
         roomStatus: true,
         biddingDate: props.details.biddingDate,
@@ -39,7 +42,7 @@ export default function Listing(props) {
 
   const stopAuction = async () => { 
     try {
-      await axios.put("/products/updateProduct", {
+      await Axios.put("/products/updateProduct", {
         id: props.details._id,
         roomStatus: false,
         biddingDate: props.details.biddingDate,
@@ -56,10 +59,15 @@ export default function Listing(props) {
     }
   }
 
-  const deleteListing = async () => { 
+  const deleteListing = () => { 
     try { 
-      await axios.delete("/products/deleteProduct/" + props.details._id);
-      props.refetch(); 
+      const imageRef = ref(storage, props.details.productImage);
+      deleteObject(imageRef).then(async () => { 
+        await Axios.delete("/products/deleteProduct/" + props.details._id);
+        props.refetch(); 
+      }).catch((err) => { 
+        console.log(err); 
+      }); 
     }
     catch (err) { 
       console.log(err); 

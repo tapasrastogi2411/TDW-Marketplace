@@ -4,13 +4,14 @@ import { Link } from "react-router-dom";
 import React from "react";
 import { useQuery } from "react-query";
 
-const axios = require("axios").default;
+// const axios = require("axios").default;
+import Axios from '../axiosBaseURL'
 
 function Main() {
 
   const fetchProducts = async () => {
     try { 
-      return await axios.get("/products/getProducts");
+      return await Axios.get("/products/getProducts");
     } 
     catch (err) { 
       console.log(err); 

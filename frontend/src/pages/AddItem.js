@@ -7,7 +7,8 @@ import { v1 as uuid } from "uuid";
 import { useNavigate } from "react-router-dom";
 import { storage } from "../config/firebase-config";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
-const axios = require("axios").default;
+// const axios = require("axios").default;
+import Axios from '../axiosBaseURL'
 
 export default function AddItem(props) {
   const navigate = useNavigate();
@@ -54,7 +55,7 @@ export default function AddItem(props) {
                 roomStatus,
                 productImage: url,
               };
-              await axios.post("/products/addProduct/", product, config);
+              await Axios.post("/products/addProduct/", product, config);
               navigate("/");
             } else {
               //TODO: Change this to have a proper error message at top which says to sign in! (make a reusable component)
@@ -90,7 +91,6 @@ export default function AddItem(props) {
 
   const changeProductImage = (e) => {
     e.preventDefault();
-    console.log(e.target.files);
     setImage(e.target.files[0]);
   };
   return (
