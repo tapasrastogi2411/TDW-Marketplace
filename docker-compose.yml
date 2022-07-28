@@ -1,0 +1,77 @@
+version: '3.7'
+
+services:
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs 
+      - ./vhost:/etc/nginx/vhost.d 
+      - ./html:/usr/share/nginx/html 
+
+  nginx-proxy-acme:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./acme:/etc/acme.sh
+    environment:
+        - DEFAULT_EMAIL=${EMAIL}
+
+  frontend:
+    build:
+      context: frontend
+      args:
+        - REACT_APP_BUCKET_URL=${REACT_APP_BUCKET_URL}
+        - REACT_APP_API_KEY=${REACT_APP_API_KEY}
+        - REACT_APP_AUTH_DOMAIN=${REACT_APP_AUTH_DOMAIN}
+        - REACT_APP_PROJECT_ID=${REACT_APP_PROJECT_ID}
+        - REACT_APP_STORAGE_BUCKET=${REACT_APP_STORAGE_BUCKET}
+        - REACT_APP_MESSAGING_SENDER_ID=${REACT_APP_MESSAGING_SENDER_ID}
+        - REACT_APP_APP_ID=${REACT_APP_APP_ID}
+        - REACT_APP_MEASUREMENT_ID=${REACT_APP_MEASUREMENT_ID}
+        - REACT_APP_BASE_URL=${REACT_APP_BASE_URL}
+    image: frontend
+    container_name: tdwmarket-frontend
+    restart: always
+    expose:
+      - 80
+    ports:
+      - 3000:80
+    environment:
+      - VIRTUAL_HOST=${VIRTUAL_HOST}
+      - LETSENCRYPT_HOST=${LETSENCRYPT_HOST}
+
+  backend:
+    image: backend
+    container_name: tdwmarket-backend
+    restart: always
+    expose:
+      - 5000
+    links:
+      - mongo
+    ports: 
+      - 5000:5000
+    environment:
+      - VIRTUAL_HOST_BACKEND=${VIRTUAL_HOST_BACKEND}
+      - LETSENCRYPT_HOST_BACKEND=${LETSENCRYPT_HOST_BACKEND}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - ATLAS_URI=${ATLAS_URI}
+      - SOCKET_ORIGIN=${SOCKET_ORIGIN}
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./database/mongodb:/data/db

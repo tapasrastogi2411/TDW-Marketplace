@@ -1,2 +1,5 @@
 image-pull-secret.yaml
 sa.yaml
+
+.env
+database
