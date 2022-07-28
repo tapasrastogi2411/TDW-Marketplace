@@ -1,5 +1,6 @@
 import axios from 'axios'
+import Config from "./config.json";
 
 export default axios.create({ 
-  baseURL: 'https://api.tdwmarket.me/',
+  baseURL: Config.BASE_URL,
 })

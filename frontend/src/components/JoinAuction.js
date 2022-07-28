@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
 import Peer from "simple-peer";
 import { useParams } from "react-router-dom";
+import Config from "../config.json";
 
 const RenderVideo = (props) => { 
   const ref = useRef();
@@ -24,7 +25,7 @@ export default function JoinAuction() {
   const [peersUpdate, setPeersUpdate] = useState([]);
 
   useEffect(() => {
-    socket.current = io.connect("https://api.tdwmarket.me/");
+    socket.current = io.connect(Config.BASE_URL);
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((mediaStream) => {

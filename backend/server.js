@@ -74,7 +74,7 @@ server = http.createServer(app);
 
 const io = require("socket.io")(server, {
   cors: {
-    origin: "https://tdwmarket.me",
+    origin: process.env.SOCKET_ORIGIN,
     methods: ["GET", "POST"],
   }
 });
