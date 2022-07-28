@@ -25,7 +25,7 @@ export default function JoinAuction() {
   const [peersUpdate, setPeersUpdate] = useState([]);
 
   useEffect(() => {
-    socket.current = io.connect(Config.BASE_URL);
+    socket.current = io.connect(process.env.REACT_APP_BASE_URL);
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((mediaStream) => {
