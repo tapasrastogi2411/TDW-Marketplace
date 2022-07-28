@@ -83,6 +83,20 @@ export default function JoinAuction() {
           }
         });
       });
+
+      socket.current.on("userDisconnected", (data) => { 
+        const userIndex = peers.current.findIndex(
+          (user) => user.userId === data.id
+        );
+        if (userIndex !== -1){ 
+          peers.current.splice(userIndex, 1);
+        } 
+        const inAuction = []; 
+        peers.current.forEach((peer) => { 
+          inAuction.push(peer.user); 
+        }); 
+        setPeersUpdate(inAuction); 
+      })
   }, [auctionId]);
 
   return (

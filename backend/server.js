@@ -175,6 +175,11 @@ io.on("connection", (socket) => {
       users.splice(userIndex, 1);
       auctionToUser[auctionId] = users;
       // TODO: send another signal telling to update the new users
+      users.forEach((userId) => { 
+        io.to(userId).emit("userDisconnected", { 
+          id: socket.id, 
+        })
+      })
     }
   });
 });
