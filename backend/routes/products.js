@@ -38,6 +38,16 @@ router.route("/getProducts").get(async (req, res) => {
   }
 });
 
+router.route("/getProducts/room/:roomId").get(async (req, res) => { 
+  try{ 
+    const product = await Product.findOne({roomId: req.params.roomId}); 
+    res.json(product); 
+  }
+  catch(error){ 
+    res.status(500).json({error: error.message}); 
+  }
+})
+
 router.route("/updateProduct").put(async (req, res) => {
   var id = req.body.id;
   var name = req.body.name;

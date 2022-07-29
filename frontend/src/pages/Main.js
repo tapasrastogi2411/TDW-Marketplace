@@ -3,8 +3,6 @@ import Listing from "../components/Listing.js";
 import { Link } from "react-router-dom";
 import React from "react";
 import { useQuery } from "react-query";
-
-// const axios = require("axios").default;
 import Axios from '../axiosBaseURL'
 
 function Main() {
@@ -22,7 +20,7 @@ function Main() {
 
   return (
     <div className="Main">
-      <Header />
+      <Header socket={undefined}/>
       <div className="flex w-11/12 ml-auto mr-auto items-center mt-5 mb-8">
         <div className="font-semibold	text-2xl	tracking-widest">
           Search for items on marketplace

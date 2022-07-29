@@ -162,6 +162,7 @@ let userToAuction = {};
 
 io.on("connection", (socket) => {
   socket.on("joinRoom", (auctionId) => {
+    console.log("connected", socket.id); 
     if (!auctionToUser[auctionId]) {
       auctionToUser[auctionId] = [];
     }
@@ -169,11 +170,23 @@ io.on("connection", (socket) => {
     if (auctionToUser[auctionId].length >= maxConnections) {
       return socket.emit("auctionFull");
     }
-    auctionToUser[auctionId].push(socket.id);
+    let checkIfSocketPresent = false; 
+    auctionToUser[auctionId].forEach((socketId) => { 
+      if (socketId === socket.id) { 
+        checkIfSocketPresent = true; 
+      }
+    })
+    if (!checkIfSocketPresent) { 
+      auctionToUser[auctionId].push(socket.id);
+    }
+    //TODO: what if user present in another room! 
     userToAuction[socket.id] = auctionId;
     const otherUsersInAuction = auctionToUser[auctionId].filter(
       (userId) => userId !== socket.id
     );
+
+    console.log("auctionToUser", auctionToUser); 
+    console.log("userToAuction", userToAuction); 
     socket.emit("otherUsersInAuction", otherUsersInAuction);
   });
 
@@ -191,21 +204,30 @@ io.on("connection", (socket) => {
     });
   });
 
+  socket.on("disconnectAll", (data) => { 
+    const user = auctionToUser[data.auctionId]; 
+    user.forEach((socketId) => { 
+      io.to(socketId).emit("disconnectPeers");
+    })
+  })
+
   socket.on("disconnect", () => {
+    console.log("disconnected", socket.id); 
     const auctionId = userToAuction[socket.id];
+    delete userToAuction[socket.id];
     let users = auctionToUser[auctionId];
     const userIndex = users ? users.indexOf(socket.id) : -1;
     if (userIndex !== -1) {
       users.splice(userIndex, 1);
       auctionToUser[auctionId] = users;
-      // TODO: send another signal telling to update the new users
-      users.forEach((userId) => {
-        io.to(userId).emit("userDisconnected", {
+      users.forEach((socketId) => {
+        io.to(socketId).emit("userDisconnected", {
           id: socket.id,
         });
       });
     }
   });
+
 });
 
 server.listen(PORT, function (err) {

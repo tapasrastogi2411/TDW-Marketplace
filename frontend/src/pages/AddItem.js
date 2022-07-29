@@ -95,7 +95,7 @@ export default function AddItem(props) {
   };
   return (
     <div>
-      <Header />
+      <Header socket={undefined}/>
       <form className="ml-10" onSubmit={onSubmit}>
         <div className="font-medium text-lg mb-5 ">Add an item:</div>
         <div className="pb-5">
