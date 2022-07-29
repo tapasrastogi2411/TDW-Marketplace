@@ -13,6 +13,8 @@ app.use(bodyParser.json());
 const admin = require("firebase-admin");
 const { getAuth } = require("firebase-admin/auth");
 
+const Queue = require("bull");
+
 const serviceAccount = require("./firebase-admin.json");
 
 let Product = require("./models/product.model");
@@ -83,7 +85,44 @@ app.use(function (req, res, next) {
   next();
 });
 
-app.get("/", function (req, res, next) {
+const sendCalendar = new Queue(
+  "send google calendar",
+  process.env.REDIS_URL
+);
+
+sendCalendar.process(async (job, done) => {
+  googleOAuth2Client.setCredentials({ refresh_token: job.data.refreshToken });
+  const listing = job.data.listing;
+  try {
+    googleResponse = await google.calendar("v3").events.insert({
+      auth: googleOAuth2Client,
+      calendarId: "primary",
+      requestBody: {
+        start: {
+          dateTime: new Date(listing.biddingDate),
+        },
+        end: {
+          dateTime: new Date(
+            new Date(listing.biddingDate).getTime() + 60 * 60 * 1000
+          ),
+        },
+        description: `${listing.description}, starting bid ${listing.startingBid}`,
+        summary: `${listing.name}'s auction event`,
+      },
+    });
+    if (googleResponse.status === 200) {
+      // calendar event created
+      done();
+    } else {
+      retry();
+    }
+  } catch (err) {
+    retry();
+  }
+  done();
+});
+
+app.get("/", async function (req, res, next) {
   res.json(req.body);
   next();
 });
@@ -100,7 +139,6 @@ app.post(
         .status(409)
         .json({ error: "Authorization is not a bearer token" });
     }
-    console.log("props: ", req.params.listing_id);
     const listingId = req.params.listing_id;
 
     let product = null;
@@ -110,39 +148,11 @@ app.post(
       res.status(500).json({ error: error.message });
     }
     authToken = authToken.replace("Bearer ", "");
-    googleOAuth2Client.setCredentials({ refresh_token: authToken });
-
-    // TODO: make this into a worker
-    let googleResponse = null;
-
-    try {
-      googleResponse = await google.calendar("v3").events.insert({
-        auth: googleOAuth2Client,
-        calendarId: "primary",
-        requestBody: {
-          start: {
-            dateTime: new Date(product.biddingDate),
-          },
-          end: {
-            dateTime: new Date(
-              new Date(product.biddingDate).getTime() + 60 * 60 * 1000
-            ),
-          },
-          description: `${product.description}, starting bid ${product.startingBid}`,
-          summary: `${product.name}'s auction event`,
-        },
-      });
-      if (googleResponse.status === 200) {
-        return res
-          .status(200)
-          .json({ message: "successfully created google event" });
-      }
-    } catch (err) {
-      return res
-        .status(err.response.status)
-        .json({ error: err.response.statusText });
-    }
-    next();
+    sendCalendar.add(
+      { refreshToken: authToken, listing: product },
+      { attempts: 3, backoff: 10000, delay: 10000 }
+    );
+    res.status(200).json({ status: "scheduled creation for calendar event" });
   }
 );
 

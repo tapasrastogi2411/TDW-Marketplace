@@ -63,3 +63,10 @@ services:
       - "27017:27017"
     volumes:
       - ../database/mongodb:/data/db
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
+    ports:
+      - 6379:6379
