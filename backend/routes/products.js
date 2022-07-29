@@ -34,7 +34,7 @@ router.route("/getProducts").get(async (req, res) => {
     const products = await Product.find({}); 
     res.json(products); 
   }catch(error){ 
-    res.status(500).json({error: err.message}); 
+    res.status(500).json({error: error.message}); 
   }
 });
 
@@ -54,7 +54,7 @@ router.route("/updateProduct").put(async (req, res) => {
       })
       res.json(updatedProduct); 
   }
-  catch { 
+  catch (err) { 
     res.status(500).json({error: err.message}); 
   }
 }); 
@@ -65,7 +65,7 @@ router.route("/deleteProduct/:id/").delete(async (req, res) => {
     const deletedProduct = await Product.deleteOne({_id: id});
     res.json(deletedProduct); 
   }
-  catch { 
+  catch (err) { 
     res.status(500).json({error: err.message}); 
   }
 }); 

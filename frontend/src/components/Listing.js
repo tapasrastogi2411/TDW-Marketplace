@@ -17,7 +17,7 @@ export default function Listing(props) {
       headers: { Authorization: `Bearer ${refresh}` },
     };
     Axios
-      .post("/api/tasks/google_calendar", {}, config)
+      .post(`/api/tasks/listings/${props.details._id}/google_calendar`, {}, config)
       .then(console.log)
       .catch(console.log);
   }

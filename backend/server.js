@@ -2,8 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 const { google } = require("googleapis");
-const cors = require('cors'); 
-app.use(cors()); 
+const cors = require("cors");
+app.use(cors());
 
 require("dotenv").config();
 
@@ -15,21 +15,21 @@ const { getAuth } = require("firebase-admin/auth");
 
 const serviceAccount = require("./firebase-admin.json");
 
+let Product = require("./models/product.model");
+
 const googleOAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
   process.env.GOOGLE_CLIENT_SECRET,
   ""
 );
 
-const uri = process.env.ATLAS_URI;  
+const uri = process.env.ATLAS_URI;
 
-//setting up database 
-mongoose.connect(uri,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+//setting up database
+mongoose.connect(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error: "));
@@ -37,11 +37,10 @@ db.once("open", function () {
   console.log("MongoDb Connected successfully");
 });
 
-const productsRouter = require('./routes/products');
-app.use('/products', productsRouter); 
+const productsRouter = require("./routes/products");
+app.use("/products", productsRouter);
 
-
-//for oauth 
+//for oauth
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://team-tdw-default-rtdb.firebaseio.com",
@@ -76,7 +75,7 @@ const io = require("socket.io")(server, {
   cors: {
     origin: process.env.SOCKET_ORIGIN,
     methods: ["GET", "POST"],
-  }
+  },
 });
 
 app.use(function (req, res, next) {
@@ -89,48 +88,63 @@ app.get("/", function (req, res, next) {
   next();
 });
 
-app.post("/api/tasks/google_calendar", async function (req, res, next) {
-  let authToken = req.headers["authorization"];
-  if (!authToken) {
-    return res.status(401).json({ error: "No authorization token provided" });
-  }
-  if (!authToken.startsWith("Bearer ")) {
-    return res
-      .status(409)
-      .json({ error: "Authorization is not a bearer token" });
-  }
-  authToken = authToken.replace("Bearer ", "");
-  googleOAuth2Client.setCredentials({ refresh_token: authToken });
-
-  // TODO: make this into a worker
-  // TODO: details of the actual event should come from database
-  let googleResponse = null;
-  try {
-    googleResponse = await google.calendar("v3").events.insert({
-      auth: googleOAuth2Client,
-      calendarId: "primary",
-      requestBody: {
-        start: {
-          dateTime: new Date(),
-        },
-        end: {
-          dateTime: new Date(Date.now() + 60 * 60 * 1000),
-        },
-        description: "placeholder description",
-      },
-    });
-    if (googleResponse.status === 200) {
-      return res
-        .status(200)
-        .json({ message: "successfully created google event" });
+app.post(
+  "/api/tasks/listings/:listing_id/google_calendar",
+  async function (req, res, next) {
+    let authToken = req.headers["authorization"];
+    if (!authToken) {
+      return res.status(401).json({ error: "No authorization token provided" });
     }
-  } catch (err) {
-    return res
-      .status(err.response.status)
-      .json({ error: err.response.statusText });
+    if (!authToken.startsWith("Bearer ")) {
+      return res
+        .status(409)
+        .json({ error: "Authorization is not a bearer token" });
+    }
+    console.log("props: ", req.params.listing_id);
+    const listingId = req.params.listing_id;
+
+    let product = null;
+    try {
+      product = await Product.findOne({ _id: listingId });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+    authToken = authToken.replace("Bearer ", "");
+    googleOAuth2Client.setCredentials({ refresh_token: authToken });
+
+    // TODO: make this into a worker
+    let googleResponse = null;
+
+    try {
+      googleResponse = await google.calendar("v3").events.insert({
+        auth: googleOAuth2Client,
+        calendarId: "primary",
+        requestBody: {
+          start: {
+            dateTime: new Date(product.biddingDate),
+          },
+          end: {
+            dateTime: new Date(
+              new Date(product.biddingDate).getTime() + 60 * 60 * 1000
+            ),
+          },
+          description: `${product.description}, starting bid ${product.startingBid}`,
+          summary: `${product.name}'s auction event`,
+        },
+      });
+      if (googleResponse.status === 200) {
+        return res
+          .status(200)
+          .json({ message: "successfully created google event" });
+      }
+    } catch (err) {
+      return res
+        .status(err.response.status)
+        .json({ error: err.response.statusText });
+    }
+    next();
   }
-  next();
-});
+);
 
 let auctionToUser = {};
 
@@ -175,11 +189,11 @@ io.on("connection", (socket) => {
       users.splice(userIndex, 1);
       auctionToUser[auctionId] = users;
       // TODO: send another signal telling to update the new users
-      users.forEach((userId) => { 
-        io.to(userId).emit("userDisconnected", { 
-          id: socket.id, 
-        })
-      })
+      users.forEach((userId) => {
+        io.to(userId).emit("userDisconnected", {
+          id: socket.id,
+        });
+      });
     }
   });
 });
