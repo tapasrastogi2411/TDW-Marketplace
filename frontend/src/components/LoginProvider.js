@@ -1,5 +1,4 @@
-import React from "react";
-import { signInToApp, getCurrentUser } from "../service/auth";
+import { signInToApp } from "../service/auth";
 import {
   googleProvider,
   // facebookProvider,
@@ -10,12 +9,10 @@ import { useNavigate } from "react-router-dom";
 
 export default function LoginProvider(props) {
   const navigate = useNavigate();
+
   const handleSignIn = async (provider) => {
     await signInToApp(provider);
-    const user = getCurrentUser();
-    if (user) {
-      navigate("/");
-    }
+    navigate("/");
   };
 
   const providers = {

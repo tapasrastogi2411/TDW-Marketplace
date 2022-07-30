@@ -1,0 +1,74 @@
+version: '3.7'
+
+services:
+
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./certs:/etc/nginx/certs 
+      - ./vhost:/etc/nginx/vhost.d 
+      - ./html:/usr/share/nginx/html 
+
+  nginx-proxy-acme:
+    image: nginxproxy/acme-companion
+    container_name: nginx-proxy-acme
+    volumes_from:
+      - nginx-proxy
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./acme:/etc/acme.sh
+    environment:
+        - DEFAULT_EMAIL=${EMAIL}
+
+  frontend:
+    image: frontend
+    container_name: tdwmarket-frontend
+    restart: always
+    expose:
+      - 80
+    ports:
+      - 3000:80
+    environment:
+      - VIRTUAL_HOST=${VIRTUAL_HOST}
+      - LETSENCRYPT_HOST=${LETSENCRYPT_HOST}
+
+  backend:
+    image: backend
+    container_name: tdwmarket-backend
+    restart: always
+    expose:
+      - 5000
+    links:
+      - mongo
+    ports: 
+      - 5000:5000
+    environment:
+      - VIRTUAL_HOST=${VIRTUAL_HOST_BACKEND}
+      - LETSENCRYPT_HOST=${LETSENCRYPT_HOST_BACKEND}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - ATLAS_URI=${ATLAS_URI}
+      - SOCKET_ORIGIN=${SOCKET_ORIGIN}
+
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - ../database/mongodb:/data/db/mongodb
+
+  redis:
+    image: redis
+    container_name: redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - ../database/redis:/data/db/redis
