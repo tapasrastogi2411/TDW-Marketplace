@@ -9,11 +9,6 @@ export default function Login(props) {
     providerName: "Google",
   };
 
-  const microsoftProviderDetail = {
-    icon: "/microsoft-icon.svg",
-    providerName: "Microsoft",
-  };
-
   return (
     <div>
       <Header/>
@@ -21,7 +16,6 @@ export default function Login(props) {
         Sign in with any of the following:
       </div>
       <LoginProvider details={googleProviderDetail} />
-      <LoginProvider details={microsoftProviderDetail} />
     </div>
   );
 }

@@ -1,10 +1,5 @@
 import { signInToApp } from "../service/auth";
-import {
-  googleProvider,
-  // facebookProvider,
-  // githubProvider,
-  microsoftProvider,
-} from "../config/authMethods";
+import { googleProvider } from "../config/authMethods";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginProvider(props) {
@@ -15,10 +10,7 @@ export default function LoginProvider(props) {
     navigate("/");
   };
 
-  const providers = {
-    Google: googleProvider,
-    Microsoft: microsoftProvider,
-  };
+  const providers = { Google: googleProvider };
   return (
     <button
       onClick={() => handleSignIn(providers[props.details.providerName])}
