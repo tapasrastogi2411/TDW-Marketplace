@@ -172,14 +172,14 @@ export default function JoinAuction() {
           className="bg-red-500 px-3 py-1 text-white rounded-md"
           onClick={() => disconnectAll()}
         >
-          Delete
+          Disconnect all users
         </button>
       )}
       <button
           className="bg-red-500 px-3 py-1 text-white rounded-md"
           onClick={() => disconnect()}
         >
-          Disconnect
+          Leave auction
         </button>
       <video
         style={{ height: "300px", width: "300px" }}

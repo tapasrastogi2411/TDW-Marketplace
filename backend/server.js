@@ -165,7 +165,7 @@ Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
 io.on("connection", (socket) => {
   socket.on("joinRoom", async (auctionId) => {
     const otherUsersInAuction = await io.in(auctionId).fetchSockets();
-    if (otherUsersInAuction.length >= 1) {
+    if (otherUsersInAuction.length >= 6) {
       socket.emit("auctionFull")
     } else {
       socket.join(auctionId);
