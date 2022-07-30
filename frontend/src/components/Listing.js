@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { UserContext } from "../App";
 import { storage } from "../config/firebase-config";
 import { ref, deleteObject } from "firebase/storage"
-
+// import io from "socket.io-client";
 // const axios = require("axios").default;
 import Axios from '../axiosBaseURL'
 
@@ -24,7 +24,7 @@ export default function Listing(props) {
   // TODO: Probably want to check for authorization in the backend when trying to delete, start auction, and end auction 
   const startAuction = async () => {
     try {
-      await Axios.put("/products/updateProduct", {
+      await Axios.put("/products/", {
         id: props.details._id,
         roomStatus: true,
         biddingDate: props.details.biddingDate,
@@ -35,6 +35,7 @@ export default function Listing(props) {
         uid: props.details.uid,
       });
       props.refetch(); 
+      // io.to(props.details._id).emit("disconnect")
     } catch (err) {
       console.log(err);
     }
@@ -42,7 +43,7 @@ export default function Listing(props) {
 
   const stopAuction = async () => { 
     try {
-      await Axios.put("/products/updateProduct", {
+      await Axios.put("/products/", {
         id: props.details._id,
         roomStatus: false,
         biddingDate: props.details.biddingDate,
@@ -63,7 +64,7 @@ export default function Listing(props) {
     try { 
       const imageRef = ref(storage, props.details.productImage);
       deleteObject(imageRef).then(async () => { 
-        await Axios.delete("/products/deleteProduct/" + props.details._id);
+        await Axios.delete("/products/" + props.details._id);
         props.refetch(); 
       }).catch((err) => { 
         console.log(err); 

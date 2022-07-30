@@ -55,7 +55,7 @@ export default function AddItem(props) {
                 roomStatus,
                 productImage: url,
               };
-              await Axios.post("/products/addProduct/", product, config);
+              await Axios.post("/products/", product, config);
               navigate("/");
             } else {
               //TODO: Change this to have a proper error message at top which says to sign in! (make a reusable component)
@@ -95,7 +95,7 @@ export default function AddItem(props) {
   };
   return (
     <div>
-      <Header socket={undefined}/>
+      <Header/>
       <form className="ml-10" onSubmit={onSubmit}>
         <div className="font-medium text-lg mb-5 ">Add an item:</div>
         <div className="pb-5">

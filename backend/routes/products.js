@@ -2,7 +2,7 @@ const router = require("express").Router();
 let Product = require("../models/product.model");
 
 //Adds product to database
-router.route("/addProduct").post(async (req, res) => {
+router.route("/").post(async (req, res) => {
   try {
     var name = req.body.name;
     var uid = req.body.uid;
@@ -29,7 +29,7 @@ router.route("/addProduct").post(async (req, res) => {
   }
 });
 
-router.route("/getProducts").get(async (req, res) => {
+router.route("/").get(async (req, res) => {
   try {
     const products = await Product.find({});
     res.json(products);
@@ -38,7 +38,7 @@ router.route("/getProducts").get(async (req, res) => {
   }
 });
 
-router.route("/getProducts/room/:roomId").get(async (req, res) => { 
+router.route("/room/:roomId").get(async (req, res) => { 
   try{ 
     const product = await Product.findOne({roomId: req.params.roomId}); 
     res.json(product); 
@@ -48,7 +48,7 @@ router.route("/getProducts/room/:roomId").get(async (req, res) => {
   }
 })
 
-router.route("/updateProduct").put(async (req, res) => {
+router.route("/").put(async (req, res) => {
   var id = req.body.id;
   var name = req.body.name;
   var uid = req.body.uid;
@@ -78,7 +78,7 @@ router.route("/updateProduct").put(async (req, res) => {
   }
 });
 
-router.route("/deleteProduct/:id/").delete(async (req, res) => {
+router.route("/:id/").delete(async (req, res) => {
   var id = req.params.id;
   try {
     const deletedProduct = await Product.deleteOne({ _id: id });

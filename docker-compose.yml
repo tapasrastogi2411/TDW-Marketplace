@@ -62,7 +62,7 @@ services:
     ports:
       - "27017:27017"
     volumes:
-      - ../database/mongodb:/data/db
+      - ../database/mongodb:/data/db/mongodb
 
   redis:
     image: redis
@@ -70,3 +70,5 @@ services:
     restart: always
     ports:
       - 6379:6379
+    volumes:
+      - ../database/redis:/data/db/redis

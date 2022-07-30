@@ -6,7 +6,7 @@ import Header from "../components/Header.js";
 import { useQuery } from "react-query";
 import Axios from "../axiosBaseURL";
 import { UserContext } from "../App";
-import { useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const RenderVideo = (props) => {
   const ref = useRef();
@@ -28,19 +28,17 @@ const RenderVideo = (props) => {
 };
 
 export default function JoinAuction() {
+  const navigate = useNavigate();
   const { user, setUser } = useContext(UserContext);
   const { auctionId } = useParams();
   const socket = useRef();
   const currentVideo = useRef();
   const peers = useRef([]);
   const [peersUpdate, setPeersUpdate] = useState([]);
-  // const location = useLocation();
-  // console.log(location);
-  // const firstRender = useRef(true);
 
   const fetchProduct = async () => {
     try {
-      return await Axios.get(`/products/getProducts/room/${auctionId}`);
+      return await Axios.get(`/products/room/${auctionId}`);
     } catch (err) {
       console.log(err);
     }
@@ -48,26 +46,9 @@ export default function JoinAuction() {
 
   const { data, status, error, refetch } = useQuery("product", fetchProduct);
 
-  // window.onpopstate = () => {
-  //   socket.current.disconnect();
-  // }
-
-  // useEffect(() => {
-  //   console.log("location changed");
-  //   if (firstRender.current) {
-  //     firstRender.current = false;
-  //     console.log("hi", location);
-  //   }
-  //   console.log(location);
-  //   if (!firstRender.current && status === "success") {
-  //     console.log(socket.current);
-  //     socket.current.disconnect();
-  //     console.log("here", status);
-  //   }
-  // }, [location])
-
   useEffect(() => {
-    socket.current = io.connect(process.env.REACT_APP_BASE_URL);
+    if (user) {
+      socket.current = io.connect(process.env.REACT_APP_BASE_URL);
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((mediaStream) => {
@@ -144,29 +125,35 @@ export default function JoinAuction() {
     });
 
     socket.current.on("auctionFull", () => {
-      //TODO: what to do when auction is full
+      navigate("/")
+      alert("auction full!");
     });
 
-    socket.current.on("disconnectPeers", () => {
-      peers.current = [];
-      setPeersUpdate([]);
-    });
-
-    window.addEventListener("beforeunload", function (e) {
-      socket.current.emit("disconnect");
-    });
+    socket.current.on("manualDisconnect", () => {
+      socket.current.disconnect()
+      // redirect and popup or something
+      navigate("/")
+    })   
+    } else {
+      alert ("please sign in")
+    }
   }, [auctionId]);
 
   const disconnectAll = () => {
     socket.current.emit("disconnectAll", { auctionId });
   };
 
+  const disconnect = () => {
+    socket.current.disconnect()
+    navigate("/")
+  }
+
   return (
     <div>
       <Header socket={socket.current} />
-      {status === "error" && <p>{error}</p>}
-      {status === "loading" && <p>Fetching Data...</p>}
-      {status === "success" && (
+      {status === "error" && user && <p>{error}</p>}
+      {status === "loading" && user &&  <p>Fetching Data...</p>}
+      {status === "success" && user && (
         <div>
           <h2>Auction Item: {data.data.name}</h2>
           <h3>Description : {data.data.description}</h3>
@@ -188,6 +175,12 @@ export default function JoinAuction() {
           Delete
         </button>
       )}
+      <button
+          className="bg-red-500 px-3 py-1 text-white rounded-md"
+          onClick={() => disconnect()}
+        >
+          Disconnect
+        </button>
       <video
         style={{ height: "300px", width: "300px" }}
         ref={currentVideo}
@@ -195,7 +188,6 @@ export default function JoinAuction() {
         autoPlay
         playsInline
       />
-      {user && (
         <div>
           <div
             style={{
@@ -208,8 +200,6 @@ export default function JoinAuction() {
             })}
           </div>
         </div>
-      )}
-      {!user && <h1>Please Log in</h1>}
     </div>
   );
 }

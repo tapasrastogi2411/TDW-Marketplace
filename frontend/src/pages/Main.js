@@ -9,7 +9,7 @@ function Main() {
 
   const fetchProducts = async () => {
     try { 
-      return await Axios.get("/products/getProducts");
+      return await Axios.get("/products/");
     } 
     catch (err) { 
       console.log(err); 
@@ -20,7 +20,7 @@ function Main() {
 
   return (
     <div className="Main">
-      <Header socket={undefined}/>
+      <Header/>
       <div className="flex w-11/12 ml-auto mr-auto items-center mt-5 mb-8">
         <div className="font-semibold	text-2xl	tracking-widest">
           Search for items on marketplace

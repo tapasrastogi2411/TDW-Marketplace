@@ -16,7 +16,7 @@ export default function Login(props) {
 
   return (
     <div>
-      <Header socket={undefined}/>
+      <Header/>
       <div className="text-center text-xl mb-4 font-medium">
         Sign in with any of the following:
       </div>

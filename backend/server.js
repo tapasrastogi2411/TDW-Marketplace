@@ -68,27 +68,12 @@ const verifyFirebaseTokenMiddleware = (req, res, next) => {
   }
 };
 
-const http = require("http");
-const PORT = process.env.PORT || 5000;
-
-server = http.createServer(app);
-
-const io = require("socket.io")(server, {
-  cors: {
-    origin: process.env.SOCKET_ORIGIN,
-    methods: ["GET", "POST"],
-  },
-});
-
 app.use(function (req, res, next) {
   console.log("HTTP request", req.method, req.url, req.body);
   next();
 });
 
-const sendCalendar = new Queue(
-  "send google calendar",
-  process.env.REDIS_URL
-);
+const sendCalendar = new Queue("send google calendar", process.env.REDIS_URL);
 
 sendCalendar.process(async (job, done) => {
   googleOAuth2Client.setCredentials({ refresh_token: job.data.refreshToken });
@@ -156,38 +141,42 @@ app.post(
   }
 );
 
-let auctionToUser = {};
+const http = require("http");
+const PORT = process.env.PORT || 5000;
 
-let userToAuction = {};
+httpServer = http.createServer(app);
+
+const io = require("socket.io")(httpServer, {
+  cors: {
+    origin: process.env.SOCKET_ORIGIN,
+    methods: ["GET", "POST"],
+  },
+});
+const createAdapter = require("@socket.io/redis-adapter");
+const { createClient } = require("redis");
+
+const pubClient = createClient({ url: process.env.REDIS_URL });
+const subClient = pubClient.duplicate();
+
+Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+  io.adapter(createAdapter(pubClient, subClient));
+});
 
 io.on("connection", (socket) => {
-  socket.on("joinRoom", (auctionId) => {
-    console.log("connected", socket.id); 
-    if (!auctionToUser[auctionId]) {
-      auctionToUser[auctionId] = [];
+  socket.on("joinRoom", async (auctionId) => {
+    const otherUsersInAuction = await io.in(auctionId).fetchSockets();
+    if (otherUsersInAuction.length >= 1) {
+      socket.emit("auctionFull")
+    } else {
+      socket.join(auctionId);
+      let listUsers = [];
+      otherUsersInAuction.forEach((user) => {
+        if (user.id !== socket.id) {
+          listUsers.push(user.id);
+        }
+      });
+      socket.emit("otherUsersInAuction", listUsers);
     }
-    const maxConnections = 10;
-    if (auctionToUser[auctionId].length >= maxConnections) {
-      return socket.emit("auctionFull");
-    }
-    let checkIfSocketPresent = false; 
-    auctionToUser[auctionId].forEach((socketId) => { 
-      if (socketId === socket.id) { 
-        checkIfSocketPresent = true; 
-      }
-    })
-    if (!checkIfSocketPresent) { 
-      auctionToUser[auctionId].push(socket.id);
-    }
-    //TODO: what if user present in another room! 
-    userToAuction[socket.id] = auctionId;
-    const otherUsersInAuction = auctionToUser[auctionId].filter(
-      (userId) => userId !== socket.id
-    );
-
-    console.log("auctionToUser", auctionToUser); 
-    console.log("userToAuction", userToAuction); 
-    socket.emit("otherUsersInAuction", otherUsersInAuction);
   });
 
   socket.on("sendingSignal", (data) => {
@@ -204,33 +193,26 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("disconnectAll", (data) => { 
-    const user = auctionToUser[data.auctionId]; 
-    user.forEach((socketId) => { 
-      io.to(socketId).emit("disconnectPeers");
-    })
-  })
-
-  socket.on("disconnect", () => {
-    console.log("disconnected", socket.id); 
-    const auctionId = userToAuction[socket.id];
-    delete userToAuction[socket.id];
-    let users = auctionToUser[auctionId];
-    const userIndex = users ? users.indexOf(socket.id) : -1;
-    if (userIndex !== -1) {
-      users.splice(userIndex, 1);
-      auctionToUser[auctionId] = users;
-      users.forEach((socketId) => {
-        io.to(socketId).emit("userDisconnected", {
-          id: socket.id,
-        });
-      });
-    }
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach((room) => {
+      if (room !== socket.id) {
+        io.to(room).emit("userDisconnected", { id: socket.id });
+      }
+    });
   });
 
+
+  socket.on("disconnectAll", async (data) => {
+    const otherUsersInAuction = await io.in(data.auctionId).fetchSockets();
+    otherUsersInAuction.forEach((user) => {
+      if (user.id !== socket.id) {
+        io.to(user.id).emit("manualDisconnect")
+      }
+    });
+  });
 });
 
-server.listen(PORT, function (err) {
+httpServer.listen(PORT, function (err) {
   if (err) console.log(err);
   else console.log("HTTP server on http://localhost:%s", PORT);
 });

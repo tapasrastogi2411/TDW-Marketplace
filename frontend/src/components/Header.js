@@ -30,7 +30,7 @@ export default function Header(props) {
   };
 
   const handleSocketDisconnection = () => { 
-    if (props.socket && props.socket !== undefined) { 
+    if (props.socket) { 
       props.socket.disconnect(); 
     }
   }
