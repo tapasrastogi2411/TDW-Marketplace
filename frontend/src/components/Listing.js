@@ -106,7 +106,7 @@ export default function Listing(props) {
           {props.details.roomStatus === true && (
             <Link
               to={`/auction_session/${props.details.roomId}`}
-              className="bg-black px-3 py-1 text-white rounded-md"
+              className="bg-black px-3 py-1 mx-3 text-white rounded-md"
             >
               Join Auction
             </Link>
@@ -115,7 +115,7 @@ export default function Listing(props) {
             user &&
             user.uid === props.details.uid && (
               <button
-                className="bg-black px-3 py-1 text-white rounded-md"
+                className="bg-black px-3 py-1 m-3 text-white rounded-md"
                 onClick={() => startAuction()}
               >
                 Start Auction
@@ -133,7 +133,7 @@ export default function Listing(props) {
             )}
           {user && user.uid === props.details.uid && ( 
             <button
-                className="bg-red-500 px-3 py-1 text-white rounded-md"
+                className="bg-red-500 px-3 py-1 m-2 text-white rounded-md"
                 onClick={() => deleteListing()}
               >
                 Delete

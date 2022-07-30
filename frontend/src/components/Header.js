@@ -37,7 +37,7 @@ export default function Header(props) {
 
   return (
     <div className="h-14 w-full flex justify-center p-1 mb-2 bg-blue-200">
-      <div className="ml-auto mr-3 self-center">
+      <div className="mr-3 self-center">
         <Link
           to="/"
           className="px-3 py-1 text-white rounded-md"
