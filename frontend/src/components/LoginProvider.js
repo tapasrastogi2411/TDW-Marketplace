@@ -6,8 +6,9 @@ export default function LoginProvider(props) {
   const navigate = useNavigate();
 
   const handleSignIn = async (provider) => {
-    await signInToApp(provider);
-    navigate("/");
+    signInToApp(provider).then(() => {
+      navigate("/");
+    })
   };
 
   const providers = { Google: googleProvider };

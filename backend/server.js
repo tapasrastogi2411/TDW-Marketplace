@@ -7,6 +7,8 @@ app.use(cors());
 
 require("dotenv").config();
 
+const sgMail = require("@sendgrid/mail");
+
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
@@ -18,6 +20,8 @@ const Queue = require("bull");
 const serviceAccount = require("./firebase-admin.json");
 
 let Product = require("./models/product.model");
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const googleOAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -56,8 +60,9 @@ const verifyFirebaseTokenMiddleware = (req, res, next) => {
     getAuth()
       .verifyIdToken(authToken)
       .then((decodedToken) => {
-        req.uid = decodedToken.uid;
-        req.authToken = authToken;
+        req.user = decodedToken;
+        // req.uid = decodedToken.uid;
+        // req.authToken = authToken;
         next();
       })
       .catch((error) => {
@@ -107,13 +112,50 @@ sendCalendar.process(async (job, done) => {
   done();
 });
 
-app.get("/", async function (req, res, next) {
-  res.json(req.body);
-  next();
+const sendEmail = new Queue("send email", process.env.REDIS_URL);
+
+sendEmail.process(async (job, done) => {
+  await sgMail.send(job.data).then(
+    () => {
+      done();
+    },
+    (error) => {
+      retry();
+    }
+  );
 });
 
 app.post(
-  "/api/tasks/listings/:listing_id/google_calendar",
+  "/api/user/tasks/send_email",
+  verifyFirebaseTokenMiddleware,
+  async function (req, res, next) {
+    if (!req.body.subject || !req.body.html) {
+      return res
+        .status(400)
+        .json({
+          error:
+            "Missing at least one of these body parameters: 'subject' or 'html'",
+        });
+    }
+    sendEmail.add(
+      {
+        to: req.user.email,
+        from: process.env.SENDGRID_EMAIL,
+        subject: req.body.subject,
+        html: req.body.html,
+      },
+      {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 10000 },
+        delay: 30000,
+      }
+    );
+    res.status(200).json({ status: "email scheduled to send" });
+  }
+);
+
+app.post(
+  "/api/listings/:listing_id/tasks/google_calendar",
   async function (req, res, next) {
     let authToken = req.headers["authorization"];
     if (!authToken) {
@@ -135,7 +177,11 @@ app.post(
     authToken = authToken.replace("Bearer ", "");
     sendCalendar.add(
       { refreshToken: authToken, listing: product },
-      { attempts: 3, backoff: 10000, delay: 10000 }
+      {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 10000 },
+        delay: 10000,
+      }
     );
     res.status(200).json({ status: "scheduled creation for calendar event" });
   }
@@ -166,7 +212,7 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", async (auctionId) => {
     const otherUsersInAuction = await io.in(auctionId).fetchSockets();
     if (otherUsersInAuction.length >= 6) {
-      socket.emit("auctionFull")
+      socket.emit("auctionFull");
     } else {
       socket.join(auctionId);
       let listUsers = [];
@@ -201,12 +247,11 @@ io.on("connection", (socket) => {
     });
   });
 
-
   socket.on("disconnectAll", async (data) => {
     const otherUsersInAuction = await io.in(data.auctionId).fetchSockets();
     otherUsersInAuction.forEach((user) => {
       if (user.id !== socket.id) {
-        io.to(user.id).emit("manualDisconnect")
+        io.to(user.id).emit("manualDisconnect");
       }
     });
   });
