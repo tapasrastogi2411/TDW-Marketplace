@@ -1,6 +1,11 @@
+# references from https://mherman.org/blog/dockerizing-a-react-app/
+# to create frontend Dockerfile and nginx.conf
+
 FROM node:14-alpine as build
 
 WORKDIR /app
+
+ENV PATH /app/node_modules/.bin:$PATH
 
 COPY package.json .
 COPY package-lock.json .
@@ -8,12 +13,33 @@ COPY package-lock.json .
 RUN npm install 
 
 COPY . .
-EXPOSE 3000
+
+ARG REACT_APP_BUCKET_URL
+ARG REACT_APP_API_KEY
+ARG REACT_APP_AUTH_DOMAIN
+ARG REACT_APP_PROJECT_ID
+ARG REACT_APP_STORAGE_BUCKET
+ARG REACT_APP_MESSAGING_SENDER_ID
+ARG REACT_APP_APP_ID
+ARG REACT_APP_MEASUREMENT_ID
+ARG REACT_APP_BASE_URL
+
+ENV REACT_APP_BUCKET_URL=$REACT_APP_BUCKET_URL
+ENV REACT_APP_API_KEY=$REACT_APP_API_KEY
+ENV REACT_APP_AUTH_DOMAIN=$REACT_APP_AUTH_DOMAIN
+ENV REACT_APP_PROJECT_ID=$REACT_APP_PROJECT_ID
+ENV REACT_APP_STORAGE_BUCKET=$REACT_APP_STORAGE_BUCKET
+ENV REACT_APP_MESSAGING_SENDER_ID=$REACT_APP_MESSAGING_SENDER_ID
+ENV REACT_APP_APP_ID=$REACT_APP_APP_ID
+ENV REACT_APP_MEASUREMENT_ID=$REACT_APP_MEASUREMENT_ID
+ENV REACT_APP_BASE_URL=$REACT_APP_BASE_URL
 
 RUN npm run build 
 
-FROM nginx:1.12-alpine
+FROM nginx:stable-alpine
 COPY --from=build /app/build /usr/share/nginx/html
+COPY nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]

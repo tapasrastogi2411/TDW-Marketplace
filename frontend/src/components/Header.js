@@ -6,7 +6,7 @@ import { UserContext } from "../App";
 import {app} from "../config/firebase-config";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-export default function Header() {
+export default function Header(props) {
   const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
   const auth = getAuth(app);
@@ -24,9 +24,16 @@ export default function Header() {
   }); 
 
   const handleSignOut = async () => {
+    handleSocketDisconnection();
     await signOutOfApp();
     navigate("/");
   };
+
+  const handleSocketDisconnection = () => { 
+    if (props.socket) { 
+      props.socket.disconnect(); 
+    }
+  }
 
   return (
     <div className="h-14 w-full flex justify-center p-1 mb-2 bg-blue-200">
@@ -34,6 +41,7 @@ export default function Header() {
         <Link
           to="/"
           className="bg-black px-3 py-1 text-white rounded-md"
+          onClick={() => handleSocketDisconnection()}
         >
           <img alt="Logo" src="/tdwmarketlogo.png"></img>
         </Link>
@@ -43,6 +51,7 @@ export default function Header() {
           <Link
             to="/login"
             className="bg-black px-3 py-1 text-white rounded-md"
+            onClick={() => handleSocketDisconnection()}
           >
             Sign in
           </Link>

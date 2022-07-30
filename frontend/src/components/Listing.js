@@ -2,8 +2,11 @@ import React, { useContext } from "react";
 import Cookies from "js-cookie";
 import { Link } from "react-router-dom";
 import { UserContext } from "../App";
-
-const axios = require("axios").default;
+import { storage } from "../config/firebase-config";
+import { ref, deleteObject } from "firebase/storage"
+// import io from "socket.io-client";
+// const axios = require("axios").default;
+import Axios from '../axiosBaseURL'
 
 export default function Listing(props) {
   const { user, setUser } = useContext(UserContext);
@@ -13,15 +16,15 @@ export default function Listing(props) {
     const config = {
       headers: { Authorization: `Bearer ${refresh}` },
     };
-    axios
-      .post("/api/tasks/google_calendar", {}, config)
+    Axios
+      .post(`/api/tasks/listings/${props.details._id}/google_calendar`, {}, config)
       .then(console.log)
       .catch(console.log);
   }
   // TODO: Probably want to check for authorization in the backend when trying to delete, start auction, and end auction 
   const startAuction = async () => {
     try {
-      await axios.put("/products/updateProduct", {
+      await Axios.put("/products/", {
         id: props.details._id,
         roomStatus: true,
         biddingDate: props.details.biddingDate,
@@ -32,6 +35,7 @@ export default function Listing(props) {
         uid: props.details.uid,
       });
       props.refetch(); 
+      // io.to(props.details._id).emit("disconnect")
     } catch (err) {
       console.log(err);
     }
@@ -39,7 +43,7 @@ export default function Listing(props) {
 
   const stopAuction = async () => { 
     try {
-      await axios.put("/products/updateProduct", {
+      await Axios.put("/products/", {
         id: props.details._id,
         roomStatus: false,
         biddingDate: props.details.biddingDate,
@@ -56,10 +60,15 @@ export default function Listing(props) {
     }
   }
 
-  const deleteListing = async () => { 
+  const deleteListing = () => { 
     try { 
-      await axios.delete("/products/deleteProduct/" + props.details._id);
-      props.refetch(); 
+      const imageRef = ref(storage, props.details.productImage);
+      deleteObject(imageRef).then(async () => { 
+        await Axios.delete("/products/" + props.details._id);
+        props.refetch(); 
+      }).catch((err) => { 
+        console.log(err); 
+      }); 
     }
     catch (err) { 
       console.log(err); 

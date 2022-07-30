@@ -1,5 +1,5 @@
 import {
-  browserSessionPersistence,
+  browserLocalPersistence,
   getAuth,
   GoogleAuthProvider,
   setPersistence,
@@ -14,14 +14,14 @@ const auth = getAuth(app);
 //signin
 export const signInToApp = (provider) => {
   //makes it so user is not automatically logged out unless window changes. 
-  setPersistence(auth, browserSessionPersistence).then(async () => { 
+  setPersistence(auth, browserLocalPersistence).then(async () => { 
     try {
       const res = await signInWithPopup(auth, provider);
       if (res.user.providerData[0].providerId === "google.com") {
-        // TODO: secure the cookie
         Cookies.set(
           "refresh",
-          GoogleAuthProvider.credentialFromResult(res).accessToken
+          GoogleAuthProvider.credentialFromResult(res).accessToken,
+          { secure: true, sameSite: 'strict', path: "/", expires: 7 }
         );
       }
       return res.user;

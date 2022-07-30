@@ -2,6 +2,8 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 const { google } = require("googleapis");
+const cors = require("cors");
+app.use(cors());
 
 require("dotenv").config();
 
@@ -11,7 +13,11 @@ app.use(bodyParser.json());
 const admin = require("firebase-admin");
 const { getAuth } = require("firebase-admin/auth");
 
+const Queue = require("bull");
+
 const serviceAccount = require("./firebase-admin.json");
+
+let Product = require("./models/product.model");
 
 const googleOAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -19,15 +25,13 @@ const googleOAuth2Client = new google.auth.OAuth2(
   ""
 );
 
-const uri = process.env.ATLAS_URI;  
+const uri = process.env.ATLAS_URI;
 
-//setting up database 
-mongoose.connect(uri,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+//setting up database
+mongoose.connect(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error: "));
@@ -35,11 +39,10 @@ db.once("open", function () {
   console.log("MongoDb Connected successfully");
 });
 
-const productsRouter = require('./routes/products');
-app.use('/products', productsRouter); 
+const productsRouter = require("./routes/products");
+app.use("/products", productsRouter);
 
-
-//for oauth 
+//for oauth
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://team-tdw-default-rtdb.firebaseio.com",
@@ -65,85 +68,115 @@ const verifyFirebaseTokenMiddleware = (req, res, next) => {
   }
 };
 
-const http = require("http");
-const PORT = process.env.PORT || 5000;
-
-server = http.createServer(app);
-
-const io = require("socket.io")(server);
-
 app.use(function (req, res, next) {
   console.log("HTTP request", req.method, req.url, req.body);
   next();
 });
 
-app.get("/", function (req, res, next) {
-  res.json(req.body);
-  next();
-});
+const sendCalendar = new Queue("send google calendar", process.env.REDIS_URL);
 
-app.post("/api/tasks/google_calendar", async function (req, res, next) {
-  let authToken = req.headers["authorization"];
-  if (!authToken) {
-    return res.status(401).json({ error: "No authorization token provided" });
-  }
-  if (!authToken.startsWith("Bearer ")) {
-    return res
-      .status(409)
-      .json({ error: "Authorization is not a bearer token" });
-  }
-  authToken = authToken.replace("Bearer ", "");
-  googleOAuth2Client.setCredentials({ refresh_token: authToken });
-
-  // TODO: make this into a worker
-  // TODO: details of the actual event should come from database
-  let googleResponse = null;
+sendCalendar.process(async (job, done) => {
+  googleOAuth2Client.setCredentials({ refresh_token: job.data.refreshToken });
+  const listing = job.data.listing;
   try {
     googleResponse = await google.calendar("v3").events.insert({
       auth: googleOAuth2Client,
       calendarId: "primary",
       requestBody: {
         start: {
-          dateTime: new Date(),
+          dateTime: new Date(listing.biddingDate),
         },
         end: {
-          dateTime: new Date(Date.now() + 60 * 60 * 1000),
+          dateTime: new Date(
+            new Date(listing.biddingDate).getTime() + 60 * 60 * 1000
+          ),
         },
-        description: "placeholder description",
+        description: `${listing.description}, starting bid ${listing.startingBid}`,
+        summary: `${listing.name}'s auction event`,
       },
     });
     if (googleResponse.status === 200) {
-      return res
-        .status(200)
-        .json({ message: "successfully created google event" });
+      // calendar event created
+      done();
+    } else {
+      retry();
     }
   } catch (err) {
-    return res
-      .status(err.response.status)
-      .json({ error: err.response.statusText });
+    retry();
   }
+  done();
+});
+
+app.get("/", async function (req, res, next) {
+  res.json(req.body);
   next();
 });
 
-let auctionToUser = {};
+app.post(
+  "/api/tasks/listings/:listing_id/google_calendar",
+  async function (req, res, next) {
+    let authToken = req.headers["authorization"];
+    if (!authToken) {
+      return res.status(401).json({ error: "No authorization token provided" });
+    }
+    if (!authToken.startsWith("Bearer ")) {
+      return res
+        .status(409)
+        .json({ error: "Authorization is not a bearer token" });
+    }
+    const listingId = req.params.listing_id;
 
-let userToAuction = {};
+    let product = null;
+    try {
+      product = await Product.findOne({ _id: listingId });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+    authToken = authToken.replace("Bearer ", "");
+    sendCalendar.add(
+      { refreshToken: authToken, listing: product },
+      { attempts: 3, backoff: 10000, delay: 10000 }
+    );
+    res.status(200).json({ status: "scheduled creation for calendar event" });
+  }
+);
+
+const http = require("http");
+const PORT = process.env.PORT || 5000;
+
+httpServer = http.createServer(app);
+
+const io = require("socket.io")(httpServer, {
+  cors: {
+    origin: process.env.SOCKET_ORIGIN,
+    methods: ["GET", "POST"],
+  },
+});
+const createAdapter = require("@socket.io/redis-adapter");
+const { createClient } = require("redis");
+
+const pubClient = createClient({ url: process.env.REDIS_URL });
+const subClient = pubClient.duplicate();
+
+Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
+  io.adapter(createAdapter(pubClient, subClient));
+});
 
 io.on("connection", (socket) => {
-  socket.on("joinRoom", (auctionId) => {
-    if (!auctionToUser[auctionId]) {
-      auctionToUser[auctionId] = [];
+  socket.on("joinRoom", async (auctionId) => {
+    const otherUsersInAuction = await io.in(auctionId).fetchSockets();
+    if (otherUsersInAuction.length >= 6) {
+      socket.emit("auctionFull")
+    } else {
+      socket.join(auctionId);
+      let listUsers = [];
+      otherUsersInAuction.forEach((user) => {
+        if (user.id !== socket.id) {
+          listUsers.push(user.id);
+        }
+      });
+      socket.emit("otherUsersInAuction", listUsers);
     }
-    const maxConnections = 10;
-    if (auctionToUser[auctionId].length >= maxConnections) {
-      return socket.emit("auctionFull");
-    }
-    auctionToUser[auctionId].push(socket.id);
-    userToAuction[socket.id] = auctionId;
-    const otherUsersInAuction = auctionToUser[auctionId].filter(
-      (userId) => userId !== socket.id
-    );
-    socket.emit("otherUsersInAuction", otherUsersInAuction);
   });
 
   socket.on("sendingSignal", (data) => {
@@ -160,19 +193,26 @@ io.on("connection", (socket) => {
     });
   });
 
-  socket.on("disconnect", () => {
-    const auctionId = userToAuction[socket.id];
-    let users = auctionToUser[auctionId];
-    const userIndex = users ? users.indexOf(socket.id) : -1;
-    if (userIndex !== -1) {
-      users.splice(userIndex, 1);
-      auctionToUser[auctionId] = users;
-      // TODO: send another signal telling to update the new users
-    }
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach((room) => {
+      if (room !== socket.id) {
+        io.to(room).emit("userDisconnected", { id: socket.id });
+      }
+    });
+  });
+
+
+  socket.on("disconnectAll", async (data) => {
+    const otherUsersInAuction = await io.in(data.auctionId).fetchSockets();
+    otherUsersInAuction.forEach((user) => {
+      if (user.id !== socket.id) {
+        io.to(user.id).emit("manualDisconnect")
+      }
+    });
   });
 });
 
-server.listen(PORT, function (err) {
+httpServer.listen(PORT, function (err) {
   if (err) console.log(err);
   else console.log("HTTP server on http://localhost:%s", PORT);
 });
