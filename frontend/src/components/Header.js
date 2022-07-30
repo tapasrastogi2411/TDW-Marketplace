@@ -40,10 +40,10 @@ export default function Header(props) {
       <div className="ml-auto mr-3 self-center">
         <Link
           to="/"
-          className="bg-black px-3 py-1 text-white rounded-md"
+          className="px-3 py-1 text-white rounded-md"
           onClick={() => handleSocketDisconnection()}
         >
-          <img alt="Logo" src="/tdwmarketlogo.png"></img>
+          <img class="h-12" alt="Logo" src="/tdwmarketlogo.png"></img>
         </Link>
       </div>
       {!user ? (
