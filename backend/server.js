@@ -61,8 +61,6 @@ const verifyFirebaseTokenMiddleware = (req, res, next) => {
       .verifyIdToken(authToken)
       .then((decodedToken) => {
         req.user = decodedToken;
-        // req.uid = decodedToken.uid;
-        // req.authToken = authToken;
         next();
       })
       .catch((error) => {
@@ -201,7 +199,7 @@ const io = require("socket.io")(httpServer, {
 const createAdapter = require("@socket.io/redis-adapter");
 const { createClient } = require("redis");
 
-const pubClient = createClient({ url: process.env.REDIS_URL });
+const pubClient = createClient({ url: process.env.REDIS_URL + ":6379" });
 const subClient = pubClient.duplicate();
 
 Promise.all([pubClient.connect(), subClient.connect()]).then(() => {

@@ -44,6 +44,7 @@ services:
     expose:
       - 5000
     links:
+      - redis
       - mongo
     ports: 
       - 5000:5000
@@ -54,6 +55,7 @@ services:
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - ATLAS_URI=${ATLAS_URI}
       - SOCKET_ORIGIN=${SOCKET_ORIGIN}
+      - REDIS_URL=${REDIS_URL}
 
   mongo:
     image: mongo
@@ -68,6 +70,8 @@ services:
     image: redis
     container_name: redis
     restart: always
+    expose:
+      - 6379
     ports:
       - 6379:6379
     volumes:
