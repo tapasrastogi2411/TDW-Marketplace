@@ -26,7 +26,7 @@ services:
         - DEFAULT_EMAIL=${EMAIL}
 
   frontend:
-    image: frontend
+    image: winsonyuan/tdw:frontend-0.0.8
     container_name: tdwmarket-frontend
     restart: always
     expose:
@@ -56,6 +56,8 @@ services:
       - ATLAS_URI=${ATLAS_URI}
       - SOCKET_ORIGIN=${SOCKET_ORIGIN}
       - REDIS_URL=${REDIS_URL}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
 
   mongo:
     image: mongo

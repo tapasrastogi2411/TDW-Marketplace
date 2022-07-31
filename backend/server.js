@@ -76,14 +76,21 @@ app.use(function (req, res, next) {
   next();
 });
 
+const redisConnection = {
+  connection: {
+    host: process.env.REDIS_HOST || "redis",
+    port: process.env.REDIS_PORT || 6379,
+  },
+}
+
 // create queue for calendar from bullmq
 const sendCalendarQueue = new Queue(
   "send google calendar",
-  process.env.REDIS_URL
+  redisConnection
 );
 
 // create queue scheduler from bullmq
-new QueueScheduler("send google calendar", { url: process.env.REDIS_URL });
+new QueueScheduler("send google calendar", redisConnection);
 
 // job to send calendar event
 const sendGoogleCalendar = async (job) => {
@@ -115,15 +122,13 @@ const sendGoogleCalendar = async (job) => {
 };
 
 // queue scheduler will use worker to send calendar
-new Worker("send google calendar", sendGoogleCalendar, {
-  url: process.env.REDIS_URL,
-});
+new Worker("send google calendar", sendGoogleCalendar, redisConnection);
 
 // create queue for sending calendar events from bullmq
-const sendEmailQueue = new Queue("send email", process.env.REDIS_URL);
+const sendEmailQueue = new Queue("send email", redisConnection);
 
 // create queue scheduler from bullmq
-new QueueScheduler("send email", { url: process.env.REDIS_URL });
+new QueueScheduler("send email", redisConnection);
 
 // job to send email
 const sendEmail = async (job) => {
@@ -135,7 +140,7 @@ const sendEmail = async (job) => {
   );
 };
 
-new Worker("send email", sendEmail, { url: process.env.REDIS_URL });
+new Worker("send email", sendEmail, redisConnection);
 
 app.post(
   "/api/user/tasks/send_email",
