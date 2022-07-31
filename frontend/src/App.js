@@ -5,6 +5,7 @@ import JoinAuction from "./components/JoinAuction";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, createContext } from "react";
 import { QueryClient, QueryClientProvider } from 'react-query'
+import { Navigate } from "react-router-dom";
 
 export const UserContext = createContext(null); 
 const queryClient = new QueryClient()
@@ -19,9 +20,15 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Main />}></Route>
-              <Route path="/auction_session/:auctionId" element={<JoinAuction />} />
+              <Route
+                path="/auction_session/:auctionId"
+                element={user ? <JoinAuction /> : <Navigate to="/login" />}
+              />
               <Route path="login" element={<Login />}></Route>
-              <Route path="listing/new" element={<AddItem />}></Route>
+              <Route
+                path="listing/new"
+                element={user ? <AddItem /> : <Navigate to="/login" />}
+              ></Route>
             </Routes>
           </BrowserRouter>
         </QueryClientProvider>
