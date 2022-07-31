@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 const admin = require("firebase-admin");
 const { getAuth } = require("firebase-admin/auth");
 
-const Queue = require("bull");
+const { Queue, QueueScheduler, Worker } = require("bullmq");
 
 const serviceAccount = require("./firebase-admin.json");
 
@@ -76,9 +76,17 @@ app.use(function (req, res, next) {
   next();
 });
 
-const sendCalendar = new Queue("send google calendar", process.env.REDIS_URL);
+// create queue for calendar from bullmq
+const sendCalendarQueue = new Queue(
+  "send google calendar",
+  process.env.REDIS_URL
+);
 
-sendCalendar.process(async (job, done) => {
+// create queue scheduler from bullmq
+new QueueScheduler("send google calendar", { url: process.env.REDIS_URL });
+
+// job to send calendar event
+const sendGoogleCalendar = async (job) => {
   googleOAuth2Client.setCredentials({ refresh_token: job.data.refreshToken });
   const listing = job.data.listing;
   try {
@@ -98,44 +106,49 @@ sendCalendar.process(async (job, done) => {
         summary: `${listing.name}'s auction event`,
       },
     });
-    if (googleResponse.status === 200) {
-      // calendar event created
-      done();
-    } else {
-      retry();
+    if (googleResponse.status !== 200) {
+      return new Error("google response failed: ", googleResponse.status);
     }
   } catch (err) {
-    retry();
+    return new Error(err);
   }
-  done();
+};
+
+// queue scheduler will use worker to send calendar
+new Worker("send google calendar", sendGoogleCalendar, {
+  url: process.env.REDIS_URL,
 });
 
-const sendEmail = new Queue("send email", process.env.REDIS_URL);
+// create queue for sending calendar events from bullmq
+const sendEmailQueue = new Queue("send email", process.env.REDIS_URL);
 
-sendEmail.process(async (job, done) => {
+// create queue scheduler from bullmq
+new QueueScheduler("send email", { url: process.env.REDIS_URL });
+
+// job to send email
+const sendEmail = async (job) => {
   await sgMail.send(job.data).then(
-    () => {
-      done();
-    },
+    () => {},
     (error) => {
-      retry();
+      return new Error(error);
     }
   );
-});
+};
+
+new Worker("send email", sendEmail, { url: process.env.REDIS_URL });
 
 app.post(
   "/api/user/tasks/send_email",
   verifyFirebaseTokenMiddleware,
   async function (req, res, next) {
     if (!req.body.subject || !req.body.html) {
-      return res
-        .status(400)
-        .json({
-          error:
-            "Missing at least one of these body parameters: 'subject' or 'html'",
-        });
+      return res.status(400).json({
+        error:
+          "Missing at least one of these body parameters: 'subject' or 'html'",
+      });
     }
-    sendEmail.add(
+    sendEmailQueue.add(
+      "send email",
       {
         to: req.user.email,
         from: process.env.SENDGRID_EMAIL,
@@ -145,7 +158,7 @@ app.post(
       {
         attempts: 3,
         backoff: { type: "exponential", delay: 10000 },
-        delay: 30000,
+        delay: 20000,
       }
     );
     res.status(200).json({ status: "email scheduled to send" });
@@ -173,7 +186,8 @@ app.post(
       res.status(500).json({ error: error.message });
     }
     authToken = authToken.replace("Bearer ", "");
-    sendCalendar.add(
+    sendCalendarQueue.add(
+      "send google calendar",
       { refreshToken: authToken, listing: product },
       {
         attempts: 3,
