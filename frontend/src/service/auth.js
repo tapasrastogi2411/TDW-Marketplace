@@ -19,7 +19,7 @@ export const signInToApp = async (provider) => {
       const res = await signInWithPopup(auth, provider);
       if (res.user.providerData[0].providerId === "google.com") {
         Cookies.set(
-          "refresh",
+          "google_id_token",
           GoogleAuthProvider.credentialFromResult(res).accessToken,
           { secure: true, sameSite: 'strict', path: "/", expires: 7 }
         );

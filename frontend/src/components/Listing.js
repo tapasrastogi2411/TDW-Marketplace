@@ -10,11 +10,10 @@ import Axios from '../axiosBaseURL'
 
 export default function Listing(props) {
   const { user, setUser } = useContext(UserContext);
-
+  const googleToken = Cookies.get("google_id_token");
   function scheduleEvent() {
-    const refresh = Cookies.get("refresh");
     const config = {
-      headers: { Authorization: `Bearer ${refresh}` },
+      headers: { Authorization: `Bearer ${googleToken}` },
     };
     Axios
       .post(`/api/listings/${props.details._id}/tasks/google_calendar`, {}, config)
@@ -96,13 +95,15 @@ export default function Listing(props) {
           <div className="mt-9">{props.details.biddingDate}</div>
         </div>
         <div className="flex items-center ml-4 mr-2">
-          <button
-            className="bg-purple-300 p-2 rounded-md"
-            onClick={() => scheduleEvent()}
-          >
-            {" "}
-            Add to calendar
-          </button>
+          {googleToken && user && 
+            <button
+              className="bg-purple-300 p-2 rounded-md"
+              onClick={() => scheduleEvent()}
+            >
+              {" "}
+              Add to calendar
+            </button>
+          }
           {props.details.roomStatus === true && (
             <Link
               to={`/auction_session/${props.details.roomId}`}
