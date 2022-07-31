@@ -157,15 +157,16 @@ export default function JoinAuction() {
       <div className="bg-purple-500/[.25]">
         {status === "success" && user && (
         
-        <><h2 className="flex items-center justify-center text-3xl pb-3">Auction Item: {data.data.name}</h2><h3 className="flex items-center justify-center">Description: {data.data.description}</h3><img
+        <><h2 className="flex items-center justify-center text-3xl pb-3">Auction Item: {data.data.name}</h2><h3 className="flex items-center justify-center">{data.data.description}</h3><img
             className="max-h-40 max-w-md pt-4 mx-auto"
             src={data.data.productImage}
             alt="item for auction"
-          ></img><h3 className="pt-6 m-3">Room ID: {data.data.roomId}</h3><h3 className="m-3">Starting Bid: {data.data.startingBid}</h3><h3 className="m-3">Bidding Date: {data.data.biddingDate}</h3></>
+          ></img><h3 className="m-3 flex items-center justify-center">Starting Bid: ${data.data.startingBid}</h3></>
         )}
+        <div className="flex items-center justify-center">
         {status === "success" && user && user.uid === data.data.uid && (
           <button
-            className="bg-red-500 px-3 py-1 m-3 text-white rounded-md"
+            className="bg-red-900 px-3 py-1 m-3 text-white rounded-md"
             onClick={() => disconnectAll()}
           >
             Disconnect all users
@@ -177,6 +178,7 @@ export default function JoinAuction() {
           >
             Leave auction
           </button>
+        </div>  
         </div>
       <video
         style={{ height: "300px", width: "300px" }}
