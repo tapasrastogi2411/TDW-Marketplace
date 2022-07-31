@@ -10,20 +10,22 @@ import Axios from '../axiosBaseURL'
 
 export default function Listing(props) {
   const { user, setUser } = useContext(UserContext);
-
+  const googleToken = Cookies.get("google_id_token");
   function scheduleEvent() {
-    const refresh = Cookies.get("refresh");
     const config = {
-      headers: { Authorization: `Bearer ${refresh}` },
+      headers: { Authorization: `Bearer ${googleToken}` },
     };
     Axios
-      .post(`/api/tasks/listings/${props.details._id}/google_calendar`, {}, config)
+      .post(`/api/listings/${props.details._id}/tasks/google_calendar`, {}, config)
       .then(console.log)
       .catch(console.log);
   }
   // TODO: Probably want to check for authorization in the backend when trying to delete, start auction, and end auction 
   const startAuction = async () => {
     try {
+      const config = {
+        headers: { Authorization: `Bearer ${user.accessToken}` },
+      };
       await Axios.put("/products/", {
         id: props.details._id,
         roomStatus: true,
@@ -33,7 +35,7 @@ export default function Listing(props) {
         roomId: props.details.roomId,
         startingBid: props.details.startingBid,
         uid: props.details.uid,
-      });
+      }, config);
       props.refetch(); 
       // io.to(props.details._id).emit("disconnect")
     } catch (err) {
@@ -43,6 +45,9 @@ export default function Listing(props) {
 
   const stopAuction = async () => { 
     try {
+      const config = {
+        headers: { Authorization: `Bearer ${user.accessToken}` },
+      };
       await Axios.put("/products/", {
         id: props.details._id,
         roomStatus: false,
@@ -52,7 +57,7 @@ export default function Listing(props) {
         roomId: props.details.roomId,
         startingBid: props.details.startingBid,
         uid: props.details.uid,
-      });
+      }, config);
       props.refetch(); 
       //TODO: probably want to remove all people currently in the room and give them an appropriate error message ! 
     } catch (err) {
@@ -64,7 +69,10 @@ export default function Listing(props) {
     try { 
       const imageRef = ref(storage, props.details.productImage);
       deleteObject(imageRef).then(async () => { 
-        await Axios.delete("/products/" + props.details._id);
+        const config = {
+          headers: { Authorization: `Bearer ${user.accessToken}` },
+        };
+        await Axios.delete("/products/" + props.details._id, config);
         props.refetch(); 
       }).catch((err) => { 
         console.log(err); 
@@ -96,13 +104,15 @@ export default function Listing(props) {
           <div className="mt-9">{props.details.biddingDate}</div>
         </div>
         <div className="flex items-center ml-4 mr-2">
-          <button
-            className="bg-purple-300 p-2 rounded-md"
-            onClick={() => scheduleEvent()}
-          >
-            {" "}
-            Add to calendar
-          </button>
+          {googleToken && user && 
+            <button
+              className="bg-purple-300 p-2 rounded-md"
+              onClick={() => scheduleEvent()}
+            >
+              {" "}
+              Add to calendar
+            </button>
+          }
           {props.details.roomStatus === true && (
             <Link
               to={`/auction_session/${props.details.roomId}`}
