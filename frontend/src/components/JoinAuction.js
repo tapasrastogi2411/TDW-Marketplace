@@ -153,34 +153,31 @@ export default function JoinAuction() {
       <Header socket={socket.current} />
       {status === "error" && user && <p>{error}</p>}
       {status === "loading" && user &&  <p>Fetching Data...</p>}
-      {status === "success" && user && (
-        <div className="m-4">
-          <h2 className="flex items-center justify-center text-3xl pb-3">Auction Item : {data.data.name}</h2>
-          <h3 className="flex items-center justify-center">Description   : {data.data.description}</h3>
-          <img
+
+      <div className="bg-purple-500/[.25]">
+        {status === "success" && user && (
+        
+        <><h2 className="flex items-center justify-center text-3xl pb-3">Auction Item: {data.data.name}</h2><h3 className="flex items-center justify-center">Description: {data.data.description}</h3><img
             className="max-h-40 max-w-md pt-4 mx-auto"
             src={data.data.productImage}
             alt="item for auction"
-          ></img>
-          <h3 className="pt-6">Room ID : {data.data.roomId}</h3>
-          <h3>Starting Bid : {data.data.startingBid}</h3>
-          <h3>Bidding Date : {data.data.biddingDate}</h3>
-        </div>
-      )}
-      {status === "success" && user && user.uid === data.data.uid && (
+          ></img><h3 className="pt-6 m-3">Room ID: {data.data.roomId}</h3><h3 className="m-3">Starting Bid: {data.data.startingBid}</h3><h3 className="m-3">Bidding Date: {data.data.biddingDate}</h3></>
+        )}
+        {status === "success" && user && user.uid === data.data.uid && (
+          <button
+            className="bg-red-500 px-3 py-1 m-3 text-white rounded-md"
+            onClick={() => disconnectAll()}
+          >
+            Disconnect all users
+          </button>
+        )}
         <button
-          className="bg-red-500 px-3 py-1 m-3 text-white rounded-md"
-          onClick={() => disconnectAll()}
-        >
-          Disconnect all users
-        </button>
-      )}
-      <button
-          className="bg-red-500 px-3 py-1 m-3 text-white rounded-md"
-          onClick={() => disconnect()}
-        >
-          Leave auction
-        </button>
+            className="bg-red-500 px-3 py-1 m-3 text-white rounded-md"
+            onClick={() => disconnect()}
+          >
+            Leave auction
+          </button>
+        </div>
       <video
         style={{ height: "300px", width: "300px" }}
         ref={currentVideo}
