@@ -15,6 +15,8 @@ app.use(bodyParser.json());
 const admin = require("firebase-admin");
 const { getAuth } = require("firebase-admin/auth");
 
+const middleware = require("./middleware.js")
+
 const { Queue, QueueScheduler, Worker } = require("bullmq");
 
 const serviceAccount = require("./firebase-admin.json");
@@ -51,25 +53,6 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
   databaseURL: "https://team-tdw-default-rtdb.firebaseio.com",
 });
-
-// middleware to verify request from frontend are from a registered firstbase user
-const verifyFirebaseTokenMiddleware = (req, res, next) => {
-  let authToken = req.headers["authorization"];
-  if (authToken) {
-    authToken = authToken.replace("Bearer ", "");
-    getAuth()
-      .verifyIdToken(authToken)
-      .then((decodedToken) => {
-        req.user = decodedToken;
-        next();
-      })
-      .catch((error) => {
-        return res.status(404).json({ error: "User not found with token" });
-      });
-  } else {
-    return res.status(401).json({ error: "No authorization token provided" });
-  }
-};
 
 app.use(function (req, res, next) {
   console.log("HTTP request", req.method, req.url, req.body);
@@ -144,7 +127,7 @@ new Worker("send email", sendEmail, redisConnection);
 
 app.post(
   "/api/user/tasks/send_email",
-  verifyFirebaseTokenMiddleware,
+  middleware.verifyFirebaseTokenMiddleware,
   async function (req, res, next) {
     if (!req.body.subject || !req.body.html) {
       return res.status(400).json({

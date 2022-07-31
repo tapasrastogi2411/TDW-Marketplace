@@ -19,11 +19,6 @@ export default function AddItem(props) {
   const [image, setImage] = useState(" ");
   const [progress, setProgress] = useState(0); 
   const [disable, setDisable] = useState(false);
-  const refresh = Cookies.get("refresh");
-  const config = {
-    headers: { Authorization: `Bearer ${refresh}` },
-  };
-
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -57,6 +52,9 @@ export default function AddItem(props) {
                 biddingDate,
                 roomStatus,
                 productImage: url,
+              };
+              const config = {
+                headers: { Authorization: `Bearer ${user.accessToken}` },
               };
               await Axios.post("/products/", product, config);
               navigate("/");

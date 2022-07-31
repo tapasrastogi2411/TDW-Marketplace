@@ -23,6 +23,9 @@ export default function Listing(props) {
   // TODO: Probably want to check for authorization in the backend when trying to delete, start auction, and end auction 
   const startAuction = async () => {
     try {
+      const config = {
+        headers: { Authorization: `Bearer ${user.accessToken}` },
+      };
       await Axios.put("/products/", {
         id: props.details._id,
         roomStatus: true,
@@ -32,7 +35,7 @@ export default function Listing(props) {
         roomId: props.details.roomId,
         startingBid: props.details.startingBid,
         uid: props.details.uid,
-      });
+      }, config);
       props.refetch(); 
       // io.to(props.details._id).emit("disconnect")
     } catch (err) {
@@ -42,6 +45,9 @@ export default function Listing(props) {
 
   const stopAuction = async () => { 
     try {
+      const config = {
+        headers: { Authorization: `Bearer ${user.accessToken}` },
+      };
       await Axios.put("/products/", {
         id: props.details._id,
         roomStatus: false,
@@ -51,7 +57,7 @@ export default function Listing(props) {
         roomId: props.details.roomId,
         startingBid: props.details.startingBid,
         uid: props.details.uid,
-      });
+      }, config);
       props.refetch(); 
       //TODO: probably want to remove all people currently in the room and give them an appropriate error message ! 
     } catch (err) {
@@ -63,7 +69,10 @@ export default function Listing(props) {
     try { 
       const imageRef = ref(storage, props.details.productImage);
       deleteObject(imageRef).then(async () => { 
-        await Axios.delete("/products/" + props.details._id);
+        const config = {
+          headers: { Authorization: `Bearer ${user.accessToken}` },
+        };
+        await Axios.delete("/products/" + props.details._id, config);
         props.refetch(); 
       }).catch((err) => { 
         console.log(err); 
