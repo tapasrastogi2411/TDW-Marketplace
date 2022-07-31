@@ -18,6 +18,7 @@ export default function AddItem(props) {
   const [biddingDate, setBiddingDate] = useState(" ");
   const [image, setImage] = useState(" ");
   const [progress, setProgress] = useState(0); 
+  const [disable, setDisable] = useState(false);
   const refresh = Cookies.get("refresh");
   const config = {
     headers: { Authorization: `Bearer ${refresh}` },
@@ -26,10 +27,12 @@ export default function AddItem(props) {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    setDisable(true)
 
     const randomName = uuid();
     const storageRef = ref(storage, `/images/${randomName}`);
     const uploadTask = uploadBytesResumable(storageRef, image);
+    
     uploadTask.on(
       "state_changes",
       (snapshot) => {
@@ -166,11 +169,13 @@ export default function AddItem(props) {
             />
           </label>
         </div>
-        <input
-          className="bg-black text-white px-4 py-1 rounded"
+        <button
+          className="bg-black text-white px-4 py-1 rounded disabled:bg-gray-500"
           type="submit"
-          value="Submit"
-        />
+          disabled={disable}
+        >
+          Submit
+          </button>
       </form>
     </div>
   );
