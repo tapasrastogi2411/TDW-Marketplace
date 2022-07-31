@@ -154,29 +154,29 @@ export default function JoinAuction() {
       {status === "error" && user && <p>{error}</p>}
       {status === "loading" && user &&  <p>Fetching Data...</p>}
       {status === "success" && user && (
-        <div>
-          <h2>Auction Item: {data.data.name}</h2>
-          <h3>Description : {data.data.description}</h3>
+        <div className="m-4">
+          <h2>Auction Item : {data.data.name}</h2>
+          <h3>Description   : {data.data.description}</h3>
           <img
-            className="max-h-36 max-w-md"
+            className="max-h-36 max-w-md pt-4"
             src={data.data.productImage}
             alt="item for auction"
           ></img>
-          <h3>Room ID : {data.data.roomId}</h3>
+          <h3 className="pt-4">Room ID : {data.data.roomId}</h3>
           <h3>Starting Bid : {data.data.startingBid}</h3>
           <h3>Bidding Date : {data.data.biddingData}</h3>
         </div>
       )}
       {status === "success" && user && user.uid === data.data.uid && (
         <button
-          className="bg-red-500 px-3 py-1 text-white rounded-md"
+          className="bg-red-500 px-3 py-1 m-3 text-white rounded-md"
           onClick={() => disconnectAll()}
         >
           Disconnect all users
         </button>
       )}
       <button
-          className="bg-red-500 px-3 py-1 text-white rounded-md"
+          className="bg-red-500 px-3 py-1 m-3 text-white rounded-md"
           onClick={() => disconnect()}
         >
           Leave auction
