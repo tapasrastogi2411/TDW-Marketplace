@@ -155,16 +155,16 @@ export default function JoinAuction() {
       {status === "loading" && user &&  <p>Fetching Data...</p>}
       {status === "success" && user && (
         <div className="m-4">
-          <h2>Auction Item : {data.data.name}</h2>
-          <h3>Description   : {data.data.description}</h3>
+          <h2 className="flex items-center justify-center text-3xl pb-3">Auction Item : {data.data.name}</h2>
+          <h3 className="flex items-center justify-center">Description   : {data.data.description}</h3>
           <img
-            className="max-h-36 max-w-md pt-4"
+            className="max-h-40 max-w-md pt-4 mx-auto"
             src={data.data.productImage}
             alt="item for auction"
           ></img>
-          <h3 className="pt-4">Room ID : {data.data.roomId}</h3>
+          <h3 className="pt-6">Room ID : {data.data.roomId}</h3>
           <h3>Starting Bid : {data.data.startingBid}</h3>
-          <h3>Bidding Date : {data.data.biddingData}</h3>
+          <h3>Bidding Date : {data.data.biddingDate}</h3>
         </div>
       )}
       {status === "success" && user && user.uid === data.data.uid && (
