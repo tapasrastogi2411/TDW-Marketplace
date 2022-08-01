@@ -174,13 +174,21 @@ export default function JoinAuction() {
       {message.status && (
         <FlashMessage duration={flashDuration}>
           <div
-            className="bg-gray-300 border-t-4 border-gray-500 rounded-b text-teal-900 px-4 py-3 shadow-md"
+            className={
+              message.status === "Success"
+                ? "bg-green-200 border-t-4 border-green-500 rounded-b text-green-900 px-4 py-3 shadow-md"
+                : "bg-red-200 border-t-4 border-red-400 rounded-b text-red-900 px-4 py-3 shadow-md"
+            }
             role="alert"
           >
             <div className="flex">
               <div className="py-1">
                 <svg
-                  className="fill-current h-6 w-6 text-gray-500 mr-4"
+                  className={
+                    message.status === "Success"
+                      ? "fill-current h-6 w-6 text-green-500 mr-4"
+                      : "fill-current h-6 w-6 text-red-400 mr-4"
+                  }
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 20 20"
                 >
