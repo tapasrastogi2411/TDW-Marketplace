@@ -7,17 +7,23 @@ app.use(cors());
 
 require("dotenv").config();
 
+const sgMail = require("@sendgrid/mail");
+
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
 const admin = require("firebase-admin");
 const { getAuth } = require("firebase-admin/auth");
 
-const Queue = require("bull");
+const middleware = require("./middleware.js");
+
+const { Queue, QueueScheduler, Worker } = require("bullmq");
 
 const serviceAccount = require("./firebase-admin.json");
 
 let Product = require("./models/product.model");
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const googleOAuth2Client = new google.auth.OAuth2(
   process.env.GOOGLE_CLIENT_ID,
@@ -48,34 +54,26 @@ admin.initializeApp({
   databaseURL: "https://team-tdw-default-rtdb.firebaseio.com",
 });
 
-// middleware to verify request from frontend are from a registered firstbase user
-const verifyFirebaseTokenMiddleware = (req, res, next) => {
-  let authToken = req.headers["authorization"];
-  if (authToken) {
-    authToken = authToken.replace("Bearer ", "");
-    getAuth()
-      .verifyIdToken(authToken)
-      .then((decodedToken) => {
-        req.uid = decodedToken.uid;
-        req.authToken = authToken;
-        next();
-      })
-      .catch((error) => {
-        return res.status(404).json({ error: "User not found with token" });
-      });
-  } else {
-    return res.status(401).json({ error: "No authorization token provided" });
-  }
-};
-
 app.use(function (req, res, next) {
   console.log("HTTP request", req.method, req.url, req.body);
   next();
 });
 
-const sendCalendar = new Queue("send google calendar", process.env.REDIS_URL);
+const redisConnection = {
+  connection: {
+    host: process.env.REDIS_HOST || "redis",
+    port: process.env.REDIS_PORT || 6379,
+  },
+};
 
-sendCalendar.process(async (job, done) => {
+// create queue for calendar from bullmq
+const sendCalendarQueue = new Queue("send google calendar", redisConnection);
+
+// create queue scheduler from bullmq
+new QueueScheduler("send google calendar", redisConnection);
+
+// job to send calendar event
+const sendGoogleCalendar = async (job) => {
   googleOAuth2Client.setCredentials({ refresh_token: job.data.refreshToken });
   const listing = job.data.listing;
   try {
@@ -95,25 +93,65 @@ sendCalendar.process(async (job, done) => {
         summary: `${listing.name}'s auction event`,
       },
     });
-    if (googleResponse.status === 200) {
-      // calendar event created
-      done();
-    } else {
-      retry();
+    if (googleResponse.status !== 200) {
+      return new Error("google response failed: ", googleResponse.status);
     }
   } catch (err) {
-    retry();
+    return new Error(err);
   }
-  done();
-});
+};
 
-app.get("/", async function (req, res, next) {
-  res.json(req.body);
-  next();
-});
+// queue scheduler will use worker to send calendar
+new Worker("send google calendar", sendGoogleCalendar, redisConnection);
+
+// create queue for sending calendar events from bullmq
+const sendEmailQueue = new Queue("send email", redisConnection);
+
+// create queue scheduler from bullmq
+new QueueScheduler("send email", redisConnection);
+
+// job to send email
+const sendEmail = async (job) => {
+  await sgMail.send(job.data).then(
+    () => {},
+    (error) => {
+      return new Error(error);
+    }
+  );
+};
+
+new Worker("send email", sendEmail, redisConnection);
 
 app.post(
-  "/api/tasks/listings/:listing_id/google_calendar",
+  "/api/user/tasks/send_email",
+  middleware.verifyFirebaseTokenMiddleware,
+  async function (req, res, next) {
+    if (!req.body.subject || !req.body.html) {
+      return res.status(400).json({
+        error:
+          "Missing at least one of these body parameters: 'subject' or 'html'",
+      });
+    }
+    sendEmailQueue.add(
+      "send email",
+      {
+        to: req.user.email,
+        from: process.env.SENDGRID_EMAIL,
+        subject: req.body.subject,
+        html: req.body.html,
+      },
+      {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 10000 },
+        delay: 20000,
+      }
+    );
+    res.status(200).json({ status: "email scheduled to send" });
+  }
+);
+
+app.post(
+  "/api/listings/:listing_id/tasks/google_calendar",
   async function (req, res, next) {
     let authToken = req.headers["authorization"];
     if (!authToken) {
@@ -133,9 +171,14 @@ app.post(
       res.status(500).json({ error: error.message });
     }
     authToken = authToken.replace("Bearer ", "");
-    sendCalendar.add(
+    sendCalendarQueue.add(
+      "send google calendar",
       { refreshToken: authToken, listing: product },
-      { attempts: 3, backoff: 10000, delay: 10000 }
+      {
+        attempts: 3,
+        backoff: { type: "exponential", delay: 10000 },
+        delay: 10000,
+      }
     );
     res.status(200).json({ status: "scheduled creation for calendar event" });
   }
@@ -155,7 +198,7 @@ const io = require("socket.io")(httpServer, {
 const createAdapter = require("@socket.io/redis-adapter");
 const { createClient } = require("redis");
 
-const pubClient = createClient({ url: process.env.REDIS_URL });
+const pubClient = createClient({ url: process.env.REDIS_URL + ":6379" });
 const subClient = pubClient.duplicate();
 
 Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
@@ -166,7 +209,7 @@ io.on("connection", (socket) => {
   socket.on("joinRoom", async (auctionId) => {
     const otherUsersInAuction = await io.in(auctionId).fetchSockets();
     if (otherUsersInAuction.length >= 6) {
-      socket.emit("auctionFull")
+      socket.emit("auctionFull");
     } else {
       socket.join(auctionId);
       let listUsers = [];
@@ -201,12 +244,11 @@ io.on("connection", (socket) => {
     });
   });
 
-
   socket.on("disconnectAll", async (data) => {
     const otherUsersInAuction = await io.in(data.auctionId).fetchSockets();
     otherUsersInAuction.forEach((user) => {
       if (user.id !== socket.id) {
-        io.to(user.id).emit("manualDisconnect")
+        io.to(user.id).emit("manualDisconnect");
       }
     });
   });

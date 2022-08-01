@@ -1,28 +1,21 @@
 import { signInToApp } from "../service/auth";
-import {
-  googleProvider,
-  // facebookProvider,
-  // githubProvider,
-  microsoftProvider,
-} from "../config/authMethods";
+import { googleProvider } from "../config/authMethods";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginProvider(props) {
   const navigate = useNavigate();
 
   const handleSignIn = async (provider) => {
-    await signInToApp(provider);
-    navigate("/");
+    signInToApp(provider).then(() => {
+      navigate("/");
+    });
   };
 
-  const providers = {
-    Google: googleProvider,
-    Microsoft: microsoftProvider,
-  };
+  const providers = { Google: googleProvider };
   return (
     <button
       onClick={() => handleSignIn(providers[props.details.providerName])}
-      className="flex justify-center items-center border w-1/4 ml-auto mr-auto border-current py-3 rounded-3xl	mt-3	"
+      className="flex justify-center items-center border w-1/2 md:w-1/3 lg:w-1/4 ml-auto mr-auto border-current py-3 rounded-3xl	mt-3"
     >
       <div>
         <img
