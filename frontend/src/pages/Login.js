@@ -11,8 +11,8 @@ export default function Login(props) {
   return (
     <div>
       <Header />
-      <div className="text-center text-xl mb-4 font-medium">
-        Sign in with any of the following:
+      <div className="text-center text-xl mb-4 pt-4 font-medium">
+      Sign in to access our website and its features!
       </div>
       <LoginProvider details={googleProviderDetail} />
     </div>
