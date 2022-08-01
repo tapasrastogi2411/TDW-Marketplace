@@ -1,5 +1,9 @@
 # TDW Market
 
+## Video Presentation Link
+
+https://www.youtube.com/watch?v=tS8krd-wUj4
+
 ## Team Members
 
 | Full Name         | Email                              | UTORid   | Stu. No.   | 
