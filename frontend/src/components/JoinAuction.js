@@ -180,13 +180,18 @@ export default function JoinAuction() {
           </button>
         </div>  
         </div>
-      <video
-        style={{ height: "300px", width: "300px" }}
-        ref={currentVideo}
-        muted
-        autoPlay
-        playsInline
-      />
+      <div className="grid grid-cols-3 gap-1">
+        <video
+          style={{ height: "300px", width: "300px" }}
+          ref={currentVideo}
+          muted
+          autoPlay
+          playsInline
+        />
+        {peersUpdate.map((peer, index) => {
+          return <RenderVideo key={index} peer={peer} />;
+        })}
+      </div>
         <div>
           <div
             style={{
@@ -194,9 +199,6 @@ export default function JoinAuction() {
               flexWrap: "wrap",
             }}
           >
-            {peersUpdate.map((peer, index) => {
-              return <RenderVideo key={index} peer={peer} />;
-            })}
           </div>
         </div>
     </div>
