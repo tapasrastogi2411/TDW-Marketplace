@@ -4,18 +4,18 @@ import AddItem from "./pages/AddItem";
 import JoinAuction from "./components/JoinAuction";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, createContext } from "react";
-import { QueryClient, QueryClientProvider } from 'react-query'
+import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate } from "react-router-dom";
 
-export const UserContext = createContext(null); 
-const queryClient = new QueryClient()
+export const UserContext = createContext(null);
+const queryClient = new QueryClient();
 
-function App() { 
-  const [user, setUser] = useState(null); 
+function App() {
+  const [user, setUser] = useState(null);
 
   return (
-    <div className="App">
-      <UserContext.Provider value={{user, setUser}}>
+    <div className="App h-screen">
+      <UserContext.Provider value={{ user, setUser }}>
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <Routes>
@@ -35,7 +35,6 @@ function App() {
       </UserContext.Provider>
     </div>
   );
-
 }
 
 export default App;

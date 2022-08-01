@@ -8,14 +8,14 @@ export default function LoginProvider(props) {
   const handleSignIn = async (provider) => {
     signInToApp(provider).then(() => {
       navigate("/");
-    })
+    });
   };
 
   const providers = { Google: googleProvider };
   return (
     <button
       onClick={() => handleSignIn(providers[props.details.providerName])}
-      className="flex justify-center items-center border w-1/4 ml-auto mr-auto border-current py-3 rounded-3xl	mt-3	"
+      className="flex justify-center items-center border w-1/2 md:w-1/3 lg:w-1/4 ml-auto mr-auto border-current py-3 rounded-3xl	mt-3"
     >
       <div>
         <img
