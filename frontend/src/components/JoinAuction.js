@@ -20,11 +20,10 @@ const RenderVideo = (props) => {
 
   return (
     <video
-      style={{ height: "300px", width: "300px" }}
       ref={ref}
       autoPlay
       playsInline
-      className="ml-auto mr-auto"
+      className="ml-auto mr-auto h-72 w-72"
     />
   );
 };
@@ -210,7 +209,7 @@ export default function JoinAuction() {
       <div className="bg-purple-500/[.25]">
         {status === "success" && user && (
           <>
-            <h2 className="flex items-center justify-center text-3xl pb-3">
+            <h2 className="flex items-center justify-center text-xl md:text-2xl lg:text-3xl pb-3">
               Auction Item: {data.data.name}
             </h2>
             <h3 className="flex items-center justify-center">
@@ -235,34 +234,27 @@ export default function JoinAuction() {
               Disconnect all users
             </button>
           )}
-          <button
-            className="bg-red-500 px-3 py-1 m-3 text-white rounded-md"
-            onClick={() => disconnect()}
-          >
-            Leave auction
-          </button>
+          {user && (
+            <button
+              className="bg-red-500 px-3 py-1 m-3 text-white rounded-md"
+              onClick={() => disconnect()}
+            >
+              Leave auction
+            </button>
+          )}
         </div>
       </div>
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 grid-flow-dense">
         <video
-          style={{ height: "300px", width: "300px" }}
           ref={currentVideo}
           muted
           autoPlay
           playsInline
-          className="ml-auto mr-auto"
+          className="ml-auto mr-auto h-72 w-72"
         />
         {peersUpdate.map((peer, index) => {
           return <RenderVideo key={index} peer={peer} />;
         })}
-      </div>
-      <div>
-        <div
-          style={{
-            margin: "auto",
-            flexWrap: "wrap",
-          }}
-        ></div>
       </div>
     </div>
   );
