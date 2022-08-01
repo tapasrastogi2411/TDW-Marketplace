@@ -43,7 +43,7 @@ export default function Header(props) {
           className="px-3 py-1 text-white rounded-md"
           onClick={() => handleSocketDisconnection()}
         >
-          <img class="h-12" alt="Logo" src="/tdwmarketlogo.png"></img>
+          <img className="h-12" alt="Logo" src="/tdwmarketlogo.png"></img>
         </Link>
       </div>
       {!user ? (
