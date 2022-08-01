@@ -206,26 +206,26 @@ export default function JoinAuction() {
       {status === "error" && user && <p>{error}</p>}
       {status === "loading" && user && <p>Fetching Data...</p>}
 
-      <div className="bg-purple-500/[.25]">
+      <div className="bg-[#FFD8C4]">
         {status === "success" && user && (
           <>
-            <h2 className="flex items-center justify-center text-xl md:text-2xl lg:text-3xl pb-3">
+            <h2 className="flex items-center justify-center text-xl md:text-2xl lg:text-3xl pb-3 pt-4 text-center">
               Auction Item: {data.data.name}
             </h2>
-            <h3 className="flex items-center justify-center">
+            <h3 className="flex items-center justify-center text-center">
               {data.data.description}
             </h3>
             <img
-              className="max-h-40 max-w-md pt-4 mx-auto"
+              className="max-h-40 max-w-md pt-4 mx-auto shadow-lg"
               src={data.data.productImage}
               alt="item for auction"
             ></img>
-            <h3 className="m-3 flex items-center justify-center">
+            <h3 className="m-3 flex items-center justify-center text-center">
               Starting Bid: ${data.data.startingBid}
             </h3>
           </>
         )}
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center pb-8">
           {status === "success" && user && user.uid === data.data.uid && (
             <button
               className="bg-red-900 px-3 py-1 m-3 text-white rounded-md"
@@ -244,7 +244,7 @@ export default function JoinAuction() {
           )}
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 grid-flow-dense">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 grid-flow-dense bg-slate-200">
         <video
           ref={currentVideo}
           muted
