@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { UserContext } from "../App";
 import {app} from "../config/firebase-config";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Cookies from "js-cookie";
 
 export default function Header(props) {
   const { user, setUser } = useContext(UserContext);
@@ -17,9 +18,10 @@ export default function Header(props) {
     if (user) { 
       //Set signed in user
       setUser(user); 
-    }else { 
+    } else { 
       //Set user to null when they logout
       setUser(null); 
+      Cookies.remove("google_id_token");
     }
   }); 
 
