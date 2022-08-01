@@ -23,6 +23,7 @@ const RenderVideo = (props) => {
       ref={ref}
       autoPlay
       playsInline
+      className="ml-auto mr-auto"
     />
   );
 };
@@ -187,6 +188,7 @@ export default function JoinAuction() {
           muted
           autoPlay
           playsInline
+          className="ml-auto mr-auto"
         />
         {peersUpdate.map((peer, index) => {
           return <RenderVideo key={index} peer={peer} />;
