@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { storage } from "../config/firebase-config";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 // const axios = require("axios").default;
-import Axios from '../axiosBaseURL'
+import Axios from "../axiosBaseURL";
 
 export default function AddItem(props) {
   const navigate = useNavigate();
@@ -17,22 +17,24 @@ export default function AddItem(props) {
   const [startingBid, setStartingBid] = useState(" ");
   const [biddingDate, setBiddingDate] = useState(" ");
   const [image, setImage] = useState(" ");
-  const [progress, setProgress] = useState(0); 
+  const [progress, setProgress] = useState(0);
   const [disable, setDisable] = useState(false);
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    setDisable(true)
+    setDisable(true);
 
     const randomName = uuid();
     const storageRef = ref(storage, `/images/${randomName}`);
     const uploadTask = uploadBytesResumable(storageRef, image);
-    
+
     uploadTask.on(
       "state_changes",
       (snapshot) => {
-        const prog = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100); 
-        setProgress(prog); 
+        const prog = Math.round(
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        );
+        setProgress(prog);
       },
       (err) => console.log(err),
       () => {
@@ -96,7 +98,7 @@ export default function AddItem(props) {
   };
   return (
     <div>
-      <Header/>
+      <Header />
       <form className="ml-10" onSubmit={onSubmit}>
         <div className="font-medium text-lg mb-5 ">Add an item:</div>
         <div className="pb-5">
@@ -173,7 +175,7 @@ export default function AddItem(props) {
           disabled={disable}
         >
           Submit
-          </button>
+        </button>
       </form>
     </div>
   );

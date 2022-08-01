@@ -8,7 +8,7 @@ export default function LoginProvider(props) {
   const handleSignIn = async (provider) => {
     signInToApp(provider).then(() => {
       navigate("/");
-    })
+    });
   };
 
   const providers = { Google: googleProvider };

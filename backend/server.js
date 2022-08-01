@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 const admin = require("firebase-admin");
 const { getAuth } = require("firebase-admin/auth");
 
-const middleware = require("./middleware.js")
+const middleware = require("./middleware.js");
 
 const { Queue, QueueScheduler, Worker } = require("bullmq");
 
@@ -64,13 +64,10 @@ const redisConnection = {
     host: process.env.REDIS_HOST || "redis",
     port: process.env.REDIS_PORT || 6379,
   },
-}
+};
 
 // create queue for calendar from bullmq
-const sendCalendarQueue = new Queue(
-  "send google calendar",
-  redisConnection
-);
+const sendCalendarQueue = new Queue("send google calendar", redisConnection);
 
 // create queue scheduler from bullmq
 new QueueScheduler("send google calendar", redisConnection);
