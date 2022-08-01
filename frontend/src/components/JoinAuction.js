@@ -168,7 +168,7 @@ export default function JoinAuction() {
   };
 
   return (
-    <div>
+    <div className="h-screen bg-slate-200">
       <Header socket={socket.current} />
       {message.status && (
         <FlashMessage duration={flashDuration}>
@@ -244,7 +244,7 @@ export default function JoinAuction() {
           )}
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 grid-flow-dense bg-slate-200">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1 grid-flow-dense">
         <video
           ref={currentVideo}
           muted
