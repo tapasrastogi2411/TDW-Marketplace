@@ -31,8 +31,18 @@ export default function Listing(props) {
       {},
       config
     )
-      .then(console.log)
-      .catch(console.log);
+      .then(() => {
+        props.setMessage({
+          content: "Scheduled to add to your calendar!",
+          status: "Success",
+        });
+      })
+      .catch(() => {
+        props.setMessage({
+          content: "Please try again later to add to calendar",
+          status: "Failure",
+        });
+      });
   }
   // TODO: Probably want to check for authorization in the backend when trying to delete, start auction, and end auction
   const startAuction = async () => {
@@ -107,7 +117,7 @@ export default function Listing(props) {
   };
 
   return (
-    <div className="w-11/12 ml-auto mr-auto border-black border p-3 mb-5 mt-3">
+    <div className="w-11/12 ml-auto mr-auto p-3 mb-5 mt-3 rounded-lg shadow-[2px_2px_20px_2px_rgba(0,0,0,0.3)]">
       <div className="flex justify-between">
         <img
           className="object-contain h-32 w-20 sm:w-32 md:w-48 flex-start"
