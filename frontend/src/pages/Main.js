@@ -73,7 +73,7 @@ function Main() {
           {user && (
             <Link
               to="listing/new"
-              className="bg-purple-300 py-2 px-3 rounded-md whitespace-nowrap font-semibold"
+              className="bg-violet-200 py-2 px-3 rounded-md whitespace-nowrap border-2 border-violet-300"
             >
               List an item
             </Link>
