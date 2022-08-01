@@ -138,11 +138,11 @@ export default function JoinAuction() {
       });
 
       socket.current.on("auctionFull", () => {
-        navigate("/");
         setMessage({
           content: "Auction is now full, please wait until someone leaves",
           status: "Failure",
         });
+        navigate("/");
       });
 
       socket.current.on("manualDisconnect", () => {
