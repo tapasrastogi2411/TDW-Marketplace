@@ -158,7 +158,7 @@ export default function AddItem(props) {
             Product name:
             <br />
             <input
-              className="bg-gray-300 pl-3 pr-16 rounded py-1"
+              className="bg-gray-300 pl-3 pr-16 rounded py-1 w-4/5 sm:w-96"
               type="text"
               name="productName"
               placeholder="eg. Round table"
@@ -171,7 +171,7 @@ export default function AddItem(props) {
             Description
             <br />
             <input
-              className="bg-gray-300 pl-3 pr-16 rounded py-1"
+              className="bg-gray-300 pl-3 pr-16 rounded py-1 w-4/5 sm:w-96"
               type="text"
               name="description"
               placeholder="eg. This product is ..."
@@ -179,12 +179,12 @@ export default function AddItem(props) {
             />
           </label>
         </div>
-        <div className="pb-5">
+        <div className="pb">
           <label>
             Product Image
             <br />
             <input
-              className="bg-gray-300 pl-3 pr-16 rounded py-1"
+              className="bg-gray-300 pl-3 pr-16 rounded py-1 w-4/5 sm:w-96"
               type="file"
               name="productImage"
               placeholder="Please upload a image."
@@ -200,7 +200,7 @@ export default function AddItem(props) {
             Starting bid:
             <br />
             <input
-              className="bg-gray-300 pl-3 pr-16 rounded py-1"
+              className="bg-gray-300 pl-3 pr-16 rounded py-1 w-4/5 sm:w-96"
               type="text"
               name="startingBid"
               placeholder="eg. 50"
@@ -213,7 +213,7 @@ export default function AddItem(props) {
             Bidding date:
             <br />
             <input
-              className="bg-gray-300 pl-3 pr-16 rounded py-1"
+              className="bg-gray-300 pl-3 pr-16 rounded py-1 w-4/5 sm:w-96"
               type="datetime-local"
               name="biddingDate"
               placeholder="eg. July 31, 2022 | 5pm"
