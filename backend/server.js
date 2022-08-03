@@ -13,7 +13,6 @@ const bodyParser = require("body-parser");
 app.use(bodyParser.json());
 
 const admin = require("firebase-admin");
-const { getAuth } = require("firebase-admin/auth");
 
 const middleware = require("./middleware.js");
 
@@ -46,7 +45,7 @@ db.once("open", function () {
 });
 
 const productsRouter = require("./routes/products");
-app.use("/products", productsRouter);
+app.use("/api/products", productsRouter);
 
 //for oauth
 admin.initializeApp({
@@ -123,12 +122,15 @@ const sendEmail = async (job) => {
 
 new Worker("send email", sendEmail, redisConnection);
 
+/* Takes in a subject and body html that will be used for the email being sent with sengrid, the work to all the 
+sendgrid api added to the send email queue that will be picked up by a worker after the specified delay time, and 
+retry the job with exponential backoff if it fails */
 app.post(
   "/api/user/tasks/send_email",
   middleware.verifyFirebaseTokenMiddleware,
   async function (req, res, next) {
     if (!req.body.subject || !req.body.html) {
-      return res.status(400).json({
+      return res.status(422).json({
         error:
           "Missing at least one of these body parameters: 'subject' or 'html'",
       });
@@ -151,8 +153,12 @@ app.post(
   }
 );
 
+/*
+Takes in a bearer authorization token thats their google oauth token, finds the appropriate product object
+adds to send calendar queue to be executed by a worker afterwards with delay specified and retry with exponential backoff if failed
+*/
 app.post(
-  "/api/listings/:listing_id/tasks/google_calendar",
+  "/api/products/:product_id/tasks/google_calendar",
   async function (req, res, next) {
     let authToken = req.headers["authorization"];
     if (!authToken) {
@@ -163,13 +169,16 @@ app.post(
         .status(409)
         .json({ error: "Authorization is not a bearer token" });
     }
-    const listingId = req.params.listing_id;
+    const productId = req.params.product_id;
 
     let product = null;
     try {
-      product = await Product.findOne({ _id: listingId });
+      product = await Product.findOne({ _id: productId });
+      if (product === null) {
+        return res.status(404).json({ error: "Product not found" });
+      }
     } catch (error) {
-      res.status(500).json({ error: error.message });
+      return res.status(500).json({ error: error.message });
     }
     authToken = authToken.replace("Bearer ", "");
     sendCalendarQueue.add(
@@ -206,7 +215,12 @@ Promise.all([pubClient.connect(), subClient.connect()]).then(() => {
   io.adapter(createAdapter(pubClient, subClient));
 });
 
+//Establishes a socket connection.
 io.on("connection", (socket) => {
+  /**
+   * When user joins a room, checks whether its full (> 5 people in room) and emits appropriate auction full signal.
+   * Otherwise, adds user to the socket room, and emits a signal with the other users in the room as data.
+   */
   socket.on("joinRoom", async (auctionId) => {
     const otherUsersInAuction = await io.in(auctionId).fetchSockets();
     if (otherUsersInAuction.length >= 6) {
@@ -223,6 +237,10 @@ io.on("connection", (socket) => {
     }
   });
 
+  /**
+   * When user receives the other users in their room after joining, adds the others in the room as peers and emits a
+   * signal to each one, so they add the new joined user as a peer.
+   */
   socket.on("sendingSignal", (data) => {
     io.to(data.userToSignal).emit("userJoinedAuction", {
       signal: data.signal,
@@ -230,6 +248,10 @@ io.on("connection", (socket) => {
     });
   });
 
+  /**
+   * Upon receiving a return signal from the other users in the room, the new user joining, emits a signal to notify
+   * them that a connection has been established.
+   */
   socket.on("receivedSignal", (data) => {
     io.to(data.userJoined).emit("gotSignal", {
       signal: data.signal,
@@ -237,6 +259,10 @@ io.on("connection", (socket) => {
     });
   });
 
+  /**
+   * When a user disconnects, the user is removed from the room and a signal is emitted to others in the room so they
+   * remove the disconnected user as a peer from their peer list.
+   */
   socket.on("disconnecting", () => {
     socket.rooms.forEach((room) => {
       if (room !== socket.id) {
@@ -245,6 +271,9 @@ io.on("connection", (socket) => {
     });
   });
 
+  /**
+   * When a user disconnects all, the other users in the room are manually disconnected by sending them an appropriate signal.
+   */
   socket.on("disconnectAll", async (data) => {
     const otherUsersInAuction = await io.in(data.auctionId).fetchSockets();
     otherUsersInAuction.forEach((user) => {

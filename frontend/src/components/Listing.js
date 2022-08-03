@@ -27,7 +27,7 @@ export default function Listing(props) {
       headers: { Authorization: `Bearer ${googleToken}` },
     };
     Axios.post(
-      `/api/listings/${props.details._id}/tasks/google_calendar`,
+      `/api/products/${props.details._id}/tasks/google_calendar`,
       {},
       config
     )
@@ -50,8 +50,8 @@ export default function Listing(props) {
       const config = {
         headers: { Authorization: `Bearer ${user.accessToken}` },
       };
-      await Axios.put(
-        "/products/",
+      await Axios.patch(
+        "/api/products/",
         {
           id: props.details._id,
           roomStatus: true,
@@ -61,6 +61,7 @@ export default function Listing(props) {
           roomId: props.details.roomId,
           startingBid: props.details.startingBid,
           uid: props.details.uid,
+          productImage: props.details.productImage,
         },
         config
       );
@@ -76,8 +77,8 @@ export default function Listing(props) {
       const config = {
         headers: { Authorization: `Bearer ${user.accessToken}` },
       };
-      await Axios.put(
-        "/products/",
+      await Axios.patch(
+        "/api/products/",
         {
           id: props.details._id,
           roomStatus: false,
@@ -87,6 +88,7 @@ export default function Listing(props) {
           roomId: props.details.roomId,
           startingBid: props.details.startingBid,
           uid: props.details.uid,
+          productImage: props.details.productImage,
         },
         config
       );
@@ -105,7 +107,7 @@ export default function Listing(props) {
           const config = {
             headers: { Authorization: `Bearer ${user.accessToken}` },
           };
-          await Axios.delete("/products/" + props.details._id, config);
+          await Axios.delete("/api/products/" + props.details._id, config);
           props.refetch();
         })
         .catch((err) => {

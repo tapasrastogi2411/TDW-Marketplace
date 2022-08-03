@@ -21,7 +21,7 @@ function Main() {
 
   const fetchProducts = async () => {
     try {
-      return await Axios.get("/products/");
+      return await Axios.get("/api/products/");
     } catch (err) {
       console.log(err);
     }

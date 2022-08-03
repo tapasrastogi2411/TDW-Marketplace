@@ -24,13 +24,11 @@ function App() {
               <Route
                 path="/"
                 element={
-                  <div className="">
+                  <div>
                     <Main />
-                    <Link to="/credits">
-                      <h6 className="underline sticky bottom-0 text-center left-0 right-0 pb-5 text-violet-500">
-                        credits
-                      </h6>
-                    </Link>
+                    <h6 className="w-full underline sticky bottom-0 text-center left-0 right-0 pb-5 text-violet-500">
+                      <Link to="/credits">credits</Link>
+                    </h6>
                   </div>
                 }
               ></Route>

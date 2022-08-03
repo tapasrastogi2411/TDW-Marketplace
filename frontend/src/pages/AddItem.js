@@ -66,7 +66,7 @@ export default function AddItem(props) {
               const config = {
                 headers: { Authorization: `Bearer ${user.accessToken}` },
               };
-              await Axios.post("/products/", product, config)
+              await Axios.post("/api/products/", product, config)
                 .then(() => {
                   navigate("/");
                 })
@@ -113,7 +113,14 @@ export default function AddItem(props) {
 
   const changeProductImage = (e) => {
     e.preventDefault();
-    setImage(e.target.files[0]);
+    if (!e.target.files[0].type.startsWith("image")) {
+      setMessage({
+        content: "Please upload an image",
+        status: "Failure",
+      });
+    } else {
+      setImage(e.target.files[0]);
+    }
   };
   return (
     <div>

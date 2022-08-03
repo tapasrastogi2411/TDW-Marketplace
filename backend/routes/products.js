@@ -1,6 +1,5 @@
 const router = require("express").Router();
 let Product = require("../models/product.model");
-const { getAuth } = require("firebase-admin/auth");
 
 const middleware = require("../middleware.js");
 
@@ -9,14 +8,28 @@ router
   .route("/")
   .post(middleware.verifyFirebaseTokenMiddleware, async (req, res) => {
     try {
-      var name = req.body.name;
-      var uid = req.body.uid;
-      var startingBid = req.body.startingBid;
-      var description = req.body.description;
-      var biddingDate = req.body.biddingDate;
-      var roomId = req.body.roomId;
-      var roomStatus = req.body.roomStatus;
-      var productImage = req.body.productImage;
+      if (
+        !req.body.name ||
+        !req.body.uid ||
+        !req.body.startingBid ||
+        !req.body.description ||
+        !req.body.biddingDate ||
+        !req.body.roomId ||
+        req.body.roomStatus === null ||
+        !req.body.productImage
+      ) {
+        return res
+          .status(422)
+          .json({ error: "Missing or Invalid Body Param." });
+      }
+      const name = req.body.name;
+      const uid = req.body.uid;
+      const startingBid = req.body.startingBid;
+      const description = req.body.description;
+      const biddingDate = req.body.biddingDate;
+      const roomId = req.body.roomId;
+      const roomStatus = req.body.roomStatus;
+      const productImage = req.body.productImage;
       const newProduct = new Product({
         name,
         uid,
@@ -27,8 +40,8 @@ router
         roomStatus,
         productImage,
       });
-      const SavedProduct = await newProduct.save();
-      res.json(SavedProduct);
+      const savedProduct = await newProduct.save();
+      res.json(savedProduct);
     } catch (err) {
       res.status(500).json({ error: err.message });
     }
@@ -46,6 +59,9 @@ router.route("/").get(async (req, res) => {
 router.route("/room/:roomId").get(async (req, res) => {
   try {
     const product = await Product.findOne({ roomId: req.params.roomId });
+    if (product === null) {
+      return res.status(404).json({ error: "Product not found" });
+    }
     res.json(product);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -54,15 +70,28 @@ router.route("/room/:roomId").get(async (req, res) => {
 
 router
   .route("/")
-  .put(middleware.verifyFirebaseTokenMiddleware, async (req, res) => {
-    var id = req.body.id;
-    var name = req.body.name;
-    var uid = req.body.uid;
-    var startingBid = req.body.startingBid;
-    var description = req.body.description;
-    var biddingDate = req.body.biddingDate;
-    var roomId = req.body.roomId;
-    var roomStatus = req.body.roomStatus;
+  .patch(middleware.verifyFirebaseTokenMiddleware, async (req, res) => {
+    if (
+      !req.body.name ||
+      !req.body.uid ||
+      !req.body.startingBid ||
+      !req.body.description ||
+      !req.body.biddingDate ||
+      !req.body.roomId ||
+      req.body.roomStatus === null ||
+      !req.body.productImage
+    ) {
+      return res.status(422).json({ error: "Missing or Invalid Body Param." });
+    }
+    const id = req.body.id;
+    const name = req.body.name;
+    const uid = req.body.uid;
+    const startingBid = req.body.startingBid;
+    const description = req.body.description;
+    const biddingDate = req.body.biddingDate;
+    const roomId = req.body.roomId;
+    const roomStatus = req.body.roomStatus;
+    const productImage = req.body.productImage;
     try {
       const updatedProduct = await Product.updateOne(
         { _id: id },
@@ -75,6 +104,7 @@ router
             description,
             biddingDate,
             roomId,
+            productImage,
           },
         }
       );
@@ -87,8 +117,17 @@ router
 router
   .route("/:id/")
   .delete(middleware.verifyFirebaseTokenMiddleware, async (req, res) => {
-    var id = req.params.id;
+    const id = req.params.id;
     try {
+      const product = await Product.findOne({ _id: id });
+      if (product === null) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      if (product.uid !== req.user.uid) {
+        return res
+          .status(403)
+          .json({ error: "Requested user is not the product owner." });
+      }
       const deletedProduct = await Product.deleteOne({ _id: id });
       res.json(deletedProduct);
     } catch (err) {
