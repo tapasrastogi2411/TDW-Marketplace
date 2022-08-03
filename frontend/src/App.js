@@ -2,10 +2,12 @@ import Main from "./pages/Main";
 import Login from "./pages/Login";
 import AddItem from "./pages/AddItem";
 import JoinAuction from "./components/JoinAuction";
+import Credits from "./pages/Credits";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useState, createContext } from "react";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export const UserContext = createContext(null);
 const queryClient = new QueryClient();
@@ -19,7 +21,19 @@ function App() {
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Main />}></Route>
+              <Route
+                path="/"
+                element={
+                  <div className="">
+                    <Main />
+                    <Link to="/credits">
+                      <h6 className="underline sticky bottom-0 text-center left-0 right-0 pb-5 text-violet-500">
+                        credits
+                      </h6>
+                    </Link>
+                  </div>
+                }
+              ></Route>
               <Route
                 path="/auction_session/:auctionId"
                 element={user ? <JoinAuction /> : <Navigate to="/login" />}
@@ -29,6 +43,7 @@ function App() {
                 path="listing/new"
                 element={user ? <AddItem /> : <Navigate to="/login" />}
               ></Route>
+              <Route path="/credits" element={<Credits />}></Route>
             </Routes>
           </BrowserRouter>
         </QueryClientProvider>
