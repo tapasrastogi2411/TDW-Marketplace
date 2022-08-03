@@ -15,37 +15,44 @@ https://www.youtube.com/watch?v=tS8krd-wUj4
 
 ## Project Description
 This is a marketplace app which allows: 
-- Users to login through various other providers 
-- Users to list items for sale (with multiple image uploads), specify more details about the item
+- Users to login through google provider
+- Users to list items for sale, specify more details about the item
 - Sellers to create live bidding sessions in a video call
 
 ## Concepts to be used for Challenge Factor
-- `OAuth 2.0` - Users are able to sign in to our application using other oauth providers such as Google, Facebook and more that request authorization for multiple scopes such as contact information 
-- `Real-time interaction` - Sellers would be able to host live bidding sessions with a video chat where they would have the option to also change their background
-- `Workers` - Utilize workers in backend to send emails a few minutes after registration, and before live bidding sessions start
-- `Scalability` - Using the Google Kubernetes Engine(GKE) Cluster for deployment will explicitly take into account scalability in our web application's design
+- `OAuth 2.0` - Users are able to sign in to our application using other oauth providers such as Google and authorization for multiple scopes such as access to their google calendar 
+- `Real-time interaction` - Sellers would be able to host live bidding sessions with a video chat where they can disconnect all the other users in the video call 
+- `Workers` - Utilize workers in backend to send emails three minutes after signing up, and for setting the event in their google calendar 
 
 ## Key features to be completed by the beta version
 - Plan on getting `OAuth 2.0` to authenticate users to login to our application 
 - Live video bidding sessions
-- Deploy web application in a docker container and a GKE Cluster
 - Functional and working UI
 - Users can add new items to sell and view others items put for sale
 
 ## Additional features to be completed by final version
-- Enhance the UI with library components such as Material UI/Tailwind CSS
-- Workers implemented to send emails after user registers and inquires about an item, and before live bidding sessions start
-- Live video session now have the ability to change their backgrounds
+- Enhance the UI with library components such as Tailwind CSS
+- Workers implemented to send emails after user registers, and when adding event to calendar
+- Live video sessions can allow users to be disconnected
+- Deploy web application in a digital ocean vm
 
 ## Tech Stack to be used to build the application
-- MongoDB - database
+- MongoDB, Redis - database
 - Express - backend
-- React and Material UI/Tailwind CSS - frontend 
+- React and Tailwind CSS - frontend 
 - NodeJS
-- API powered by GraphQL
-- Images uploaded by users to be stored in Amazon S3
+- Images uploaded by users to be stored in Firebase Storage
+### Packages 
+- Socket.io and Simple Peer 
+- Firebase 
+- SendGrid 
+- BullMQ 
+- Mongoose 
+- Google API 
+- Redis Adapter 
 
 ## Method of Deployment
-- Dockerize and push to GitHub Container Registry for both frontend and backend application
-- Deploy with Google Kubernetes Engine Cluster
+- Dockerize and push to Docker Hub for both frontend and backend application
+- Deploy with Digital Ocean VM
+
 
