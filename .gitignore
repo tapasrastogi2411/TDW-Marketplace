@@ -3,3 +3,4 @@ sa.yaml
 
 .env
 database
+redis.conf

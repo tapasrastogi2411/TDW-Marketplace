@@ -1,7 +1,10 @@
 version: '3.7'
 
-services:
+volumes:
+  redis_data:
+  mongo_data:
 
+services:
   nginx-proxy:
     image: jwilder/nginx-proxy
     container_name: nginx-proxy
@@ -58,23 +61,20 @@ services:
       - REDIS_URL=${REDIS_URL}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
 
   mongo:
     image: mongo
     container_name: mongo
     restart: always
-    ports:
-      - "27017:27017"
     volumes:
-      - ../database/mongodb:/data/db/mongodb
+      - mongo_data:/data/db
 
   redis:
     image: redis
     container_name: redis
     restart: always
-    expose:
-      - 6379
-    ports:
-      - 6379:6379
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
     volumes:
-      - ../database/redis:/data/db/redis
+      - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
