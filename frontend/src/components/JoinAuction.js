@@ -46,7 +46,7 @@ export default function JoinAuction() {
 
   const fetchProduct = async () => {
     try {
-      return await Axios.get(`/api/products/room/${auctionId}`);
+      return await Axios.get(`/api/products/${auctionId}`);
     } catch (err) {
       console.log(err);
     }

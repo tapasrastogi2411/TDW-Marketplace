@@ -30,7 +30,7 @@ const googleOAuth2Client = new google.auth.OAuth2(
   ""
 );
 
-const uri = process.env.ATLAS_URI;
+const uri = process.env.MONGO_URI;
 
 //setting up database
 mongoose.connect(uri, {
@@ -125,6 +125,7 @@ new Worker("send email", sendEmail, redisConnection);
 /* Takes in a subject and body html that will be used for the email being sent with sengrid, the work to all the 
 sendgrid api added to the send email queue that will be picked up by a worker after the specified delay time, and 
 retry the job with exponential backoff if it fails */
+// CURRENTLY delayed for 3 minutes
 app.post(
   "/api/user/tasks/send_email",
   middleware.verifyFirebaseTokenMiddleware,
@@ -146,7 +147,7 @@ app.post(
       {
         attempts: 3,
         backoff: { type: "exponential", delay: 10000 },
-        delay: 20000,
+        delay: 180000,
       }
     );
     res.status(200).json({ status: "email scheduled to send" });
@@ -157,6 +158,7 @@ app.post(
 Takes in a bearer authorization token thats their google oauth token, finds the appropriate product object
 adds to send calendar queue to be executed by a worker afterwards with delay specified and retry with exponential backoff if failed
 */
+// CURRENTLY DELAYED FOR 3 MINUTES
 app.post(
   "/api/products/:product_id/tasks/google_calendar",
   async function (req, res, next) {
@@ -187,7 +189,7 @@ app.post(
       {
         attempts: 3,
         backoff: { type: "exponential", delay: 10000 },
-        delay: 10000,
+        delay: 180000,
       }
     );
     res.status(200).json({ status: "scheduled creation for calendar event" });

@@ -50,7 +50,6 @@ export default function AddItem(props) {
           try {
             const user = getCurrentUser();
             if (user) {
-              const roomId = uuid();
               const uid = user.uid;
               const roomStatus = false;
               const product = {
@@ -58,7 +57,6 @@ export default function AddItem(props) {
                 uid,
                 startingBid,
                 description,
-                roomId,
                 biddingDate,
                 roomStatus,
                 productImage: url,

@@ -58,7 +58,6 @@ export default function Listing(props) {
           biddingDate: props.details.biddingDate,
           description: props.details.description,
           name: props.details.name,
-          roomId: props.details.roomId,
           startingBid: props.details.startingBid,
           uid: props.details.uid,
           productImage: props.details.productImage,
@@ -85,7 +84,6 @@ export default function Listing(props) {
           biddingDate: props.details.biddingDate,
           description: props.details.description,
           name: props.details.name,
-          roomId: props.details.roomId,
           startingBid: props.details.startingBid,
           uid: props.details.uid,
           productImage: props.details.productImage,
@@ -186,7 +184,7 @@ export default function Listing(props) {
                 )}
                 {showJoin && (
                   <Link
-                    to={`/auction_session/${props.details.roomId}`}
+                    to={`/auction_session/${props.details._id}`}
                     className="text-gray-700 hover:bg-gray-300 block px-4 py-2 text-sm"
                   >
                     Join Auction

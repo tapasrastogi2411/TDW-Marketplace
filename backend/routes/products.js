@@ -14,7 +14,6 @@ router
         !req.body.startingBid ||
         !req.body.description ||
         !req.body.biddingDate ||
-        !req.body.roomId ||
         req.body.roomStatus === null ||
         !req.body.productImage
       ) {
@@ -22,21 +21,21 @@ router
           .status(422)
           .json({ error: "Missing or Invalid Body Param." });
       }
-      const name = req.body.name;
-      const uid = req.body.uid;
-      const startingBid = req.body.startingBid;
-      const description = req.body.description;
-      const biddingDate = req.body.biddingDate;
-      const roomId = req.body.roomId;
-      const roomStatus = req.body.roomStatus;
-      const productImage = req.body.productImage;
+      const {
+        name,
+        uid,
+        startingBid,
+        description,
+        biddingDate,
+        roomStatus,
+        productImage,
+      } = req.body;
       const newProduct = new Product({
         name,
         uid,
         startingBid,
         description,
         biddingDate,
-        roomId,
         roomStatus,
         productImage,
       });
@@ -56,9 +55,9 @@ router.route("/").get(async (req, res) => {
   }
 });
 
-router.route("/room/:roomId").get(async (req, res) => {
+router.route("/:id/").get(async (req, res) => {
   try {
-    const product = await Product.findOne({ roomId: req.params.roomId });
+    const product = await Product.findOne({ _id: req.params.id });
     if (product === null) {
       return res.status(404).json({ error: "Product not found" });
     }
@@ -77,21 +76,21 @@ router
       !req.body.startingBid ||
       !req.body.description ||
       !req.body.biddingDate ||
-      !req.body.roomId ||
       req.body.roomStatus === null ||
       !req.body.productImage
     ) {
       return res.status(422).json({ error: "Missing or Invalid Body Param." });
     }
-    const id = req.body.id;
-    const name = req.body.name;
-    const uid = req.body.uid;
-    const startingBid = req.body.startingBid;
-    const description = req.body.description;
-    const biddingDate = req.body.biddingDate;
-    const roomId = req.body.roomId;
-    const roomStatus = req.body.roomStatus;
-    const productImage = req.body.productImage;
+    const {
+      id,
+      name,
+      uid,
+      startingBid,
+      description,
+      biddingDate,
+      roomStatus,
+      productImage,
+    } = req.body;
     try {
       const product = await Product.findOne({ _id: id });
       if (product === null) {
@@ -112,7 +111,6 @@ router
             startingBid,
             description,
             biddingDate,
-            roomId,
             productImage,
           },
         }
