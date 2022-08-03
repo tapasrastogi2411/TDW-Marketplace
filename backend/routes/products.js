@@ -93,6 +93,15 @@ router
     const roomStatus = req.body.roomStatus;
     const productImage = req.body.productImage;
     try {
+      const product = await Product.findOne({ _id: id });
+      if (product === null) {
+        return res.status(404).json({ error: "Product not found" });
+      }
+      if (product.uid !== req.user.uid) {
+        return res
+          .status(403)
+          .json({ error: "Requested user is not the product owner." });
+      }
       const updatedProduct = await Product.updateOne(
         { _id: id },
         {
